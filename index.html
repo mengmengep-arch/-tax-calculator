@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คำนวณภาษีเงินได้บุคคลธรรมดา - พนักงานประจำ</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1>🧮 คำนวณภาษีเงินได้บุคคลธรรมดา</h1>
+                    <p class="subtitle">สำหรับพนักงานประจำในประเทศไทย (ปีภาษี 2568)</p>
+                </div>
+                <div class="header-buttons">
+                    <button class="btn-salary-slips" onclick="window.location.href='salary-slips.html'" title="จัดการสลิปเงินเดือนและคำนวณรายได้รวมทั้งปี">
+                        📄 จัดการสลิป
+                    </button>
+                    <button class="btn-reset" onclick="resetAllData()" title="ล้างข้อมูลทั้งหมดและเริ่มใหม่">
+                        🔄 Reset Data
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-step active clickable" data-step="1" onclick="jumpToStep(1)" title="คลิกเพื่อไปที่ขั้นตอนนี้">
+                <div class="step-number">1</div>
+                <div class="step-label">ข้อมูลรายได้</div>
+            </div>
+            <div class="progress-step clickable" data-step="2" onclick="jumpToStep(2)" title="คลิกเพื่อไปที่ขั้นตอนนี้">
+                <div class="step-number">2</div>
+                <div class="step-label">ค่าลดหย่อนพื้นฐาน</div>
+            </div>
+            <div class="progress-step clickable" data-step="3" onclick="jumpToStep(3)" title="คลิกเพื่อไปที่ขั้นตอนนี้">
+                <div class="step-number">3</div>
+                <div class="step-label">Simulation</div>
+            </div>
+            <div class="progress-step clickable" data-step="4" onclick="jumpToStep(4)" title="คลิกเพื่อไปที่ขั้นตอนนี้">
+                <div class="step-number">4</div>
+                <div class="step-label">ผลการคำนวณ</div>
+            </div>
+        </div>
+
+        <div class="wizard-container">
+            <!-- Step 1: ข้อมูลรายได้ -->
+            <div class="wizard-step active" id="step1">
+                <h2>📊 ข้อมูลรายได้</h2>
+
+                <div class="form-group">
+                    <label for="salary">เงินเดือนต่อเดือน (บาท):</label>
+                    <div class="input-with-slider">
+                        <input type="text" id="salary" placeholder="เช่น 30,000">
+                        <input type="range" id="salarySlider" min="0" max="200000" step="1000" value="30000">
+                    </div>
+                    <div class="slider-value">ค่าปัจจุบัน: <span id="salaryDisplay">30,000</span> บาท</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bonus">โบนัสรวมต่อปี (บาท):</label>
+                    <div class="input-with-slider">
+                        <input type="text" id="bonus" placeholder="เช่น 60,000">
+                        <input type="range" id="bonusSlider" min="0" max="500000" step="10000" value="0">
+                    </div>
+                    <div class="slider-value">ค่าปัจจุบัน: <span id="bonusDisplay">0</span> บาท</div>
+                </div>
+
+                <div class="info-box">
+                    <h4>📋 สรุปรายได้</h4>
+                    <p>รายได้รวมต่อปี: <strong id="totalIncomePreview">360,000</strong> บาท</p>
+                    <p>ค่าใช้จ่าย 50% (สูงสุด 100,000): <strong id="expensesPreview">100,000</strong> บาท</p>
+                    <p>รายได้สุทธิ: <strong id="netIncomePreview">260,000</strong> บาท</p>
+                </div>
+
+                <button class="btn-next" onclick="nextStep(2)">ถัดไป →</button>
+            </div>
+
+            <!-- Step 2: ค่าลดหย่อนพื้นฐาน -->
+            <div class="wizard-step" id="step2">
+                <h2>👨‍👩‍👧‍👦 ค่าลดหย่อนพื้นฐาน</h2>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="personalDeduction" checked disabled>
+                        ค่าลดหย่อนส่วนตัว (60,000 บาท)
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="spouseDeduction">
+                        คู่สมรส (ไม่มีเงินได้) (60,000 บาท)
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="childCount">จำนวนบุตร (คนละ 30,000 บาท):</label>
+                    <div class="input-with-slider">
+                        <input type="text" id="childCount" value="0" readonly>
+                        <input type="range" id="childSlider" min="0" max="5" step="1" value="0">
+                    </div>
+                    <div class="slider-value">จำนวน: <span id="childDisplay">0</span> คน (ลดหย่อน: <span id="childDeductionDisplay">0</span> บาท)</div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="parentDeduction">
+                        บิดามารดาตนเอง (30,000 บาท/คน)
+                    </label>
+                    <div class="sub-option" id="parentOptions" style="display: none;">
+                        <select id="parentCount">
+                            <option value="1">1 คน (30,000 บาท)</option>
+                            <option value="2">2 คน (60,000 บาท)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="parentSpouseDeduction">
+                        บิดามารดาคู่สมรส (30,000 บาท/คน)
+                    </label>
+                    <div class="sub-option" id="parentSpouseOptions" style="display: none;">
+                        <select id="parentSpouseCount">
+                            <option value="1">1 คน (30,000 บาท)</option>
+                            <option value="2">2 คน (60,000 บาท)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="socialSecurity">ประกันสังคม (บาท/ปี):</label>
+                    <div class="input-with-slider">
+                        <input type="text" id="socialSecurity" placeholder="สูงสุด 10,000">
+                        <input type="range" id="socialSecuritySlider" min="0" max="10000" step="100" value="9000">
+                    </div>
+                    <div class="slider-value">ค่าปัจจุบัน: <span id="socialSecurityDisplay">9,000</span> บาท</div>
+                    <small>ประกันสังคม: 750 บาท/เดือน = 9,000 บาท/ปี (สูงสุด 10,000)</small>
+                </div>
+
+                <div class="info-box">
+                    <h4>📋 สรุปค่าลดหย่อนพื้นฐาน</h4>
+                    <p>ค่าลดหย่อนรวม: <strong id="basicDeductionPreview">69,000</strong> บาท</p>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-prev" onclick="prevStep(1)">← ย้อนกลับ</button>
+                    <button class="btn-next" onclick="nextStep(3)">ถัดไป →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Simulation (UI ใหม่: ตารางเปรียบเทียบ) -->
+            <div class="wizard-step" id="step3">
+                <h2>🎯 เปรียบเทียบแผนการลดหย่อน</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 30px;">
+                    เลือกค่าลดหย่อนเพิ่มเติมสำหรับแผน 1 และแผน 2 เพื่อเปรียบเทียบภาษีที่ต้องจ่าย
+                </p>
+
+                <!-- Summary Cards -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+                    <!-- Baseline Card -->
+                    <div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 12px; text-align: center;">
+                        <h4 style="margin: 0 0 10px 0; color: #2196F3;">🔵 ไม่ลดหย่อนเพิ่ม</h4>
+                        <p style="font-size: 1.5rem; font-weight: bold; margin: 10px 0; color: #1976D2;" id="baselineTaxPreview">0</p>
+                        <p style="font-size: 0.9rem; color: #666;" id="baselineTaxMonthlyPreview">0 บาท/เดือน</p>
+                    </div>
+
+                    <!-- Plan 1 Card -->
+                    <div style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); padding: 20px; border-radius: 12px; text-align: center;">
+                        <h4 style="margin: 0 0 10px 0; color: #4CAF50;">🟢 แผน 1</h4>
+                        <p style="font-size: 1.5rem; font-weight: bold; margin: 10px 0; color: #388E3C;" id="plan1TaxPreview">0</p>
+                        <p style="font-size: 0.9rem; color: #666;" id="plan1TaxMonthlyPreview">0 บาท/เดือน</p>
+                        <p style="font-size: 0.85rem; color: #4CAF50; font-weight: bold; margin-top: 5px;" id="plan1SavingsPreview">ประหยัด: 0 บาท</p>
+                    </div>
+
+                    <!-- Plan 2 Card -->
+                    <div style="background: linear-gradient(135deg, #fff9e6 0%, #ffe9b8 100%); padding: 20px; border-radius: 12px; text-align: center;">
+                        <h4 style="margin: 0 0 10px 0; color: #F57C00;">🟡 แผน 2</h4>
+                        <p style="font-size: 1.5rem; font-weight: bold; margin: 10px 0; color: #E65100;" id="plan2TaxPreview">0</p>
+                        <p style="font-size: 0.9rem; color: #666;" id="plan2TaxMonthlyPreview">0 บาท/เดือน</p>
+                        <p style="font-size: 0.85rem; color: #F57C00; font-weight: bold; margin-top: 5px;" id="plan2SavingsPreview">ประหยัด: 0 บาท</p>
+                    </div>
+                </div>
+
+                <!-- ตารางเปรียบเทียบแผน 1 vs แผน 2 -->
+                <div class="comparison-table-container" style="margin-bottom: 30px;">
+                    <table class="deduction-comparison-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 35%; text-align: left;">รายการค่าลดหย่อน</th>
+                                <th style="width: 30%; text-align: center; background: #e8f5e9; color: #4CAF50;">🟢 แผน 1</th>
+                                <th style="width: 30%; text-align: center; background: #fff9e6; color: #F57C00;">🟡 แผน 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- ประกันชีวิต -->
+                            <tr class="deduction-row">
+                                <td class="item-name">
+                                    <div style="font-weight: 600;">🛡️ เบี้ยประกันชีวิต</div>
+                                    <small style="color: #999;">รวมกับประกันสุขภาพไม่เกิน 100,000 บาท</small>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan1_lifeInsurance_check" onchange="toggleDeductionRow('plan1', 'lifeInsurance')">
+                                        <div class="slider-container" id="plan1_lifeInsurance_container" style="display: none;">
+                                            <input type="range" id="plan1_lifeInsurance" min="0" max="100000" step="1000" value="0"
+                                                   oninput="updateDeductionValue('plan1', 'lifeInsurance')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan1_lifeInsurance_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan1', 'lifeInsurance')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan2_lifeInsurance_check" onchange="toggleDeductionRow('plan2', 'lifeInsurance')">
+                                        <div class="slider-container" id="plan2_lifeInsurance_container" style="display: none;">
+                                            <input type="range" id="plan2_lifeInsurance" min="0" max="100000" step="1000" value="0"
+                                                   oninput="updateDeductionValue('plan2', 'lifeInsurance')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan2_lifeInsurance_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan2', 'lifeInsurance')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- ประกันสุขภาพ -->
+                            <tr class="deduction-row">
+                                <td class="item-name">
+                                    <div style="font-weight: 600;">🛡️ เบี้ยประกันสุขภาพ</div>
+                                    <small style="color: #999;">รวมกับประกันชีวิตไม่เกิน 100,000 บาท</small>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan1_healthInsurance_check" onchange="toggleDeductionRow('plan1', 'healthInsurance')">
+                                        <div class="slider-container" id="plan1_healthInsurance_container" style="display: none;">
+                                            <input type="range" id="plan1_healthInsurance" min="0" max="100000" step="1000" value="0"
+                                                   oninput="updateDeductionValue('plan1', 'healthInsurance')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan1_healthInsurance_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan1', 'healthInsurance')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan2_healthInsurance_check" onchange="toggleDeductionRow('plan2', 'healthInsurance')">
+                                        <div class="slider-container" id="plan2_healthInsurance_container" style="display: none;">
+                                            <input type="range" id="plan2_healthInsurance" min="0" max="100000" step="1000" value="0"
+                                                   oninput="updateDeductionValue('plan2', 'healthInsurance')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan2_healthInsurance_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan2', 'healthInsurance')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- ประกันบำนาญ -->
+                            <tr class="deduction-row">
+                                <td class="item-name">
+                                    <div style="font-weight: 600;">💰 ประกันบำนาญ</div>
+                                    <small style="color: #999;">15% ของรายได้, รวมกับ PVD+RMF ไม่เกิน 500,000</small>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan1_pensionInsurance_check" onchange="toggleDeductionRow('plan1', 'pensionInsurance')">
+                                        <div class="slider-container" id="plan1_pensionInsurance_container" style="display: none;">
+                                            <input type="range" id="plan1_pensionInsurance" min="0" max="200000" step="5000" value="0"
+                                                   oninput="updateDeductionValue('plan1', 'pensionInsurance')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan1_pensionInsurance_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan1', 'pensionInsurance')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan2_pensionInsurance_check" onchange="toggleDeductionRow('plan2', 'pensionInsurance')">
+                                        <div class="slider-container" id="plan2_pensionInsurance_container" style="display: none;">
+                                            <input type="range" id="plan2_pensionInsurance" min="0" max="200000" step="5000" value="0"
+                                                   oninput="updateDeductionValue('plan2', 'pensionInsurance')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan2_pensionInsurance_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan2', 'pensionInsurance')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- กองทุนสำรองเลี้ยงชีพ PVD -->
+                            <tr class="deduction-row">
+                                <td class="item-name">
+                                    <div style="font-weight: 600;">💰 กองทุน PVD</div>
+                                    <small style="color: #999;">รวมกับ RMF+ประกันบำนาญ ไม่เกิน 500,000</small>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan1_pvd_check" onchange="toggleDeductionRow('plan1', 'pvd')">
+                                        <div class="slider-container" id="plan1_pvd_container" style="display: none;">
+                                            <input type="range" id="plan1_pvd" min="0" max="500000" step="10000" value="0"
+                                                   oninput="updateDeductionValue('plan1', 'pvd')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan1_pvd_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan1', 'pvd')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan2_pvd_check" onchange="toggleDeductionRow('plan2', 'pvd')">
+                                        <div class="slider-container" id="plan2_pvd_container" style="display: none;">
+                                            <input type="range" id="plan2_pvd" min="0" max="500000" step="10000" value="0"
+                                                   oninput="updateDeductionValue('plan2', 'pvd')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan2_pvd_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan2', 'pvd')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- กองทุน RMF -->
+                            <tr class="deduction-row">
+                                <td class="item-name">
+                                    <div style="font-weight: 600;">💰 กองทุน RMF</div>
+                                    <small style="color: #999;">30% ของรายได้, รวมกับ PVD+ประกันบำนาญ ไม่เกิน 500,000</small>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan1_rmf_check" onchange="toggleDeductionRow('plan1', 'rmf')">
+                                        <div class="slider-container" id="plan1_rmf_container" style="display: none;">
+                                            <input type="range" id="plan1_rmf" min="0" max="500000" step="10000" value="0"
+                                                   oninput="updateDeductionValue('plan1', 'rmf')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan1_rmf_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan1', 'rmf')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan2_rmf_check" onchange="toggleDeductionRow('plan2', 'rmf')">
+                                        <div class="slider-container" id="plan2_rmf_container" style="display: none;">
+                                            <input type="range" id="plan2_rmf" min="0" max="500000" step="10000" value="0"
+                                                   oninput="updateDeductionValue('plan2', 'rmf')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan2_rmf_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan2', 'rmf')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- กองทุน Thai ESG -->
+                            <tr class="deduction-row">
+                                <td class="item-name">
+                                    <div style="font-weight: 600;">กองทุน Thai ESG</div>
+                                    <small style="color: #999;">สูงสุด 30% ของรายได้, ไม่เกิน 300,000</small>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan1_thaiEsg_check" onchange="toggleDeductionRow('plan1', 'thaiEsg')">
+                                        <div class="slider-container" id="plan1_thaiEsg_container" style="display: none;">
+                                            <input type="range" id="plan1_thaiEsg" min="0" max="300000" step="10000" value="0"
+                                                   oninput="updateDeductionValue('plan1', 'thaiEsg')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan1_thaiEsg_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan1', 'thaiEsg')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan2_thaiEsg_check" onchange="toggleDeductionRow('plan2', 'thaiEsg')">
+                                        <div class="slider-container" id="plan2_thaiEsg_container" style="display: none;">
+                                            <input type="range" id="plan2_thaiEsg" min="0" max="300000" step="10000" value="0"
+                                                   oninput="updateDeductionValue('plan2', 'thaiEsg')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan2_thaiEsg_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan2', 'thaiEsg')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- กองทุน Thai ESGx -->
+                            <tr class="deduction-row">
+                                <td class="item-name">
+                                    <div style="font-weight: 600;">⭐ กองทุน Thai ESGx (ปี 2568)</div>
+                                    <small style="color: #999;">สูงสุด 30%, ไม่เกิน 300,000</small>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan1_thaiEsgx_check" onchange="toggleDeductionRow('plan1', 'thaiEsgx')">
+                                        <div class="slider-container" id="plan1_thaiEsgx_container" style="display: none;">
+                                            <input type="range" id="plan1_thaiEsgx" min="0" max="300000" step="10000" value="0"
+                                                   oninput="updateDeductionValue('plan1', 'thaiEsgx')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan1_thaiEsgx_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan1', 'thaiEsgx')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan2_thaiEsgx_check" onchange="toggleDeductionRow('plan2', 'thaiEsgx')">
+                                        <div class="slider-container" id="plan2_thaiEsgx_container" style="display: none;">
+                                            <input type="range" id="plan2_thaiEsgx" min="0" max="300000" step="10000" value="0"
+                                                   oninput="updateDeductionValue('plan2', 'thaiEsgx')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan2_thaiEsgx_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan2', 'thaiEsgx')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- ดอกเบี้ยบ้าน -->
+                            <tr class="deduction-row">
+                                <td class="item-name">
+                                    <div style="font-weight: 600;">ดอกเบี้ยบ้าน</div>
+                                    <small style="color: #999;">สูงสุด 100,000 บาท</small>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan1_homeLoan_check" onchange="toggleDeductionRow('plan1', 'homeLoan')">
+                                        <div class="slider-container" id="plan1_homeLoan_container" style="display: none;">
+                                            <input type="range" id="plan1_homeLoan" min="0" max="100000" step="5000" value="0"
+                                                   oninput="updateDeductionValue('plan1', 'homeLoan')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan1_homeLoan_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan1', 'homeLoan')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan2_homeLoan_check" onchange="toggleDeductionRow('plan2', 'homeLoan')">
+                                        <div class="slider-container" id="plan2_homeLoan_container" style="display: none;">
+                                            <input type="range" id="plan2_homeLoan" min="0" max="100000" step="5000" value="0"
+                                                   oninput="updateDeductionValue('plan2', 'homeLoan')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan2_homeLoan_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan2', 'homeLoan')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- บริจาคพิเศษ 2 เท่า -->
+                            <tr class="deduction-row">
+                                <td class="item-name">
+                                    <div style="font-weight: 600;">⭐ บริจาคพิเศษ 2 เท่า</div>
+                                    <small style="color: #999;">การศึกษา/กีฬา/โรงพยาบาล</small>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan1_donationDouble_check" onchange="toggleDeductionRow('plan1', 'donationDouble')">
+                                        <div class="slider-container" id="plan1_donationDouble_container" style="display: none;">
+                                            <input type="range" id="plan1_donationDouble" min="0" max="50000" step="1000" value="0"
+                                                   oninput="updateDeductionValue('plan1', 'donationDouble')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan1_donationDouble_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan1', 'donationDouble')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan2_donationDouble_check" onchange="toggleDeductionRow('plan2', 'donationDouble')">
+                                        <div class="slider-container" id="plan2_donationDouble_container" style="display: none;">
+                                            <input type="range" id="plan2_donationDouble" min="0" max="50000" step="1000" value="0"
+                                                   oninput="updateDeductionValue('plan2', 'donationDouble')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan2_donationDouble_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan2', 'donationDouble')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- บริจาคพรรคการเมือง -->
+                            <tr class="deduction-row">
+                                <td class="item-name">
+                                    <div style="font-weight: 600;">บริจาคพรรคการเมือง</div>
+                                    <small style="color: #999;">สูงสุด 10,000 บาท</small>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan1_donationPolitical_check" onchange="toggleDeductionRow('plan1', 'donationPolitical')">
+                                        <div class="slider-container" id="plan1_donationPolitical_container" style="display: none;">
+                                            <input type="range" id="plan1_donationPolitical" min="0" max="10000" step="500" value="0"
+                                                   oninput="updateDeductionValue('plan1', 'donationPolitical')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan1_donationPolitical_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan1', 'donationPolitical')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan2_donationPolitical_check" onchange="toggleDeductionRow('plan2', 'donationPolitical')">
+                                        <div class="slider-container" id="plan2_donationPolitical_container" style="display: none;">
+                                            <input type="range" id="plan2_donationPolitical" min="0" max="10000" step="500" value="0"
+                                                   oninput="updateDeductionValue('plan2', 'donationPolitical')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan2_donationPolitical_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan2', 'donationPolitical')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Easy E-Receipt -->
+                            <tr class="deduction-row">
+                                <td class="item-name">
+                                    <div style="font-weight: 600;">Easy E-Receipt (ชอปดีมีคืน)</div>
+                                    <small style="color: #999;">สูงสุด 50,000 บาท</small>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan1_easyEreceipt_check" onchange="toggleDeductionRow('plan1', 'easyEreceipt')">
+                                        <div class="slider-container" id="plan1_easyEreceipt_container" style="display: none;">
+                                            <input type="range" id="plan1_easyEreceipt" min="0" max="50000" step="1000" value="0"
+                                                   oninput="updateDeductionValue('plan1', 'easyEreceipt')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan1_easyEreceipt_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan1', 'easyEreceipt')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="plan-cell">
+                                    <div class="plan-control">
+                                        <input type="checkbox" id="plan2_easyEreceipt_check" onchange="toggleDeductionRow('plan2', 'easyEreceipt')">
+                                        <div class="slider-container" id="plan2_easyEreceipt_container" style="display: none;">
+                                            <input type="range" id="plan2_easyEreceipt" min="0" max="50000" step="1000" value="0"
+                                                   oninput="updateDeductionValue('plan2', 'easyEreceipt')" class="comparison-slider">
+                                            <div class="slider-value-display">
+                                                <span id="plan2_easyEreceipt_display">0</span> บาท
+                                                <button type="button" class="max-btn" onclick="setMaxValue('plan2', 'easyEreceipt')">Max</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ส่วนแสดงลิมิตรวม -->
+                <div style="margin: 30px 0;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <!-- แผน 1: ลิมิตรวม -->
+                        <div style="background: #e8f5e9; padding: 20px; border-radius: 12px; border: 2px solid #4CAF50;">
+                            <h4 style="margin: 0 0 15px 0; color: #2E7D32;">🟢 แผน 1 - สรุปลิมิต</h4>
+
+                            <!-- ลิมิตประกัน 100K -->
+                            <div style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span style="font-size: 0.9rem; color: #666;">🛡️ ประกัน (รวม):</span>
+                                    <span id="plan1_insurance_total" style="font-weight: 600; color: #2E7D32;">0 / 100,000</span>
+                                </div>
+                                <div style="background: #fff; border-radius: 4px; height: 8px; overflow: hidden;">
+                                    <div id="plan1_insurance_bar" style="background: linear-gradient(90deg, #4CAF50, #81C784); height: 100%; width: 0%; transition: width 0.3s, background 0.3s;"></div>
+                                </div>
+                                <div id="plan1_insurance_warning" style="font-size: 0.8rem; color: #666; margin-top: 3px;"></div>
+                            </div>
+
+                            <!-- ลิมิตกลุ่ม 500K -->
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span style="font-size: 0.9rem; color: #666;">💰 กลุ่ม 500K (รวม):</span>
+                                    <span id="plan1_retirement_total" style="font-weight: 600; color: #2E7D32;">0 / 500,000</span>
+                                </div>
+                                <div style="background: #fff; border-radius: 4px; height: 8px; overflow: hidden;">
+                                    <div id="plan1_retirement_bar" style="background: linear-gradient(90deg, #4CAF50, #81C784); height: 100%; width: 0%; transition: width 0.3s, background 0.3s;"></div>
+                                </div>
+                                <div id="plan1_retirement_warning" style="font-size: 0.8rem; color: #666; margin-top: 3px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- แผน 2: ลิมิตรวม -->
+                        <div style="background: #fff9e6; padding: 20px; border-radius: 12px; border: 2px solid #F57C00;">
+                            <h4 style="margin: 0 0 15px 0; color: #E65100;">🟡 แผน 2 - สรุปลิมิต</h4>
+
+                            <!-- ลิมิตประกัน 100K -->
+                            <div style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span style="font-size: 0.9rem; color: #666;">🛡️ ประกัน (รวม):</span>
+                                    <span id="plan2_insurance_total" style="font-weight: 600; color: #E65100;">0 / 100,000</span>
+                                </div>
+                                <div style="background: #fff; border-radius: 4px; height: 8px; overflow: hidden;">
+                                    <div id="plan2_insurance_bar" style="background: linear-gradient(90deg, #F57C00, #FFB74D); height: 100%; width: 0%; transition: width 0.3s, background 0.3s;"></div>
+                                </div>
+                                <div id="plan2_insurance_warning" style="font-size: 0.8rem; color: #666; margin-top: 3px;"></div>
+                            </div>
+
+                            <!-- ลิมิตกลุ่ม 500K -->
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span style="font-size: 0.9rem; color: #666;">💰 กลุ่ม 500K (รวม):</span>
+                                    <span id="plan2_retirement_total" style="font-weight: 600; color: #E65100;">0 / 500,000</span>
+                                </div>
+                                <div style="background: #fff; border-radius: 4px; height: 8px; overflow: hidden;">
+                                    <div id="plan2_retirement_bar" style="background: linear-gradient(90deg, #F57C00, #FFB74D); height: 100%; width: 0%; transition: width 0.3s, background 0.3s;"></div>
+                                </div>
+                                <div id="plan2_retirement_warning" style="font-size: 0.8rem; color: #666; margin-top: 3px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-prev" onclick="prevStep(2)">← ย้อนกลับ</button>
+                    <button class="btn-next" onclick="nextStep(4)">ดูผลการวิเคราะห์ →</button>
+                </div>
+            </div>
+
+            <!-- Step 4: ผลการวิเคราะห์ -->
+            <div class="wizard-step" id="step4">
+                <h2>📊 ผลการวิเคราะห์และแนะนำ</h2>
+
+                <div class="comparison-chart">
+                    <canvas id="finalComparisonChart"></canvas>
+                </div>
+
+                <div class="pie-charts-container">
+                    <div class="pie-chart-item">
+                        <canvas id="plan1PieChart"></canvas>
+                    </div>
+                    <div class="pie-chart-item">
+                        <canvas id="plan2PieChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="comparison-summary">
+                    <div class="summary-card baseline">
+                        <h3>🔵 ไม่ลดหย่อนเพิ่ม</h3>
+                        <div class="tax-amount" id="finalBaselineTax">0 บาท/ปี</div>
+                        <div class="monthly-amount" id="finalBaselineMonthly">0 บาท/เดือน</div>
+                    </div>
+
+                    <div class="summary-card plan1">
+                        <h3>🟢 แผน 1</h3>
+                        <div class="tax-amount" id="finalPlan1Tax">0 บาท/ปี</div>
+                        <div class="monthly-amount" id="finalPlan1Monthly">0 บาท/เดือน</div>
+                        <div class="savings">ประหยัด: <span id="finalPlan1Savings">0</span> บาท/ปี</div>
+                    </div>
+
+                    <div class="summary-card plan2">
+                        <h3>🟡 แผน 2</h3>
+                        <div class="tax-amount" id="finalPlan2Tax">0 บาท/ปี</div>
+                        <div class="monthly-amount" id="finalPlan2Monthly">0 บาท/เดือน</div>
+                        <div class="savings">ประหยัด: <span id="finalPlan2Savings">0</span> บาท/ปี</div>
+                    </div>
+                </div>
+
+                <div class="recommendation" id="recommendation">
+                    <!-- แนะนำจะถูกสร้างโดย JavaScript -->
+                </div>
+
+                <div class="detailed-breakdown">
+                    <h3>รายละเอียดแต่ละแผน</h3>
+                    <div id="detailedTables"></div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-prev" onclick="prevStep(3)">← ย้อนกลับ</button>
+                    <button class="btn-export-pdf" onclick="exportTaxPDF()" title="บันทึกผลการคำนวณเป็น PDF">📥 Export PDF</button>
+                    <button class="btn-success" onclick="startOver()">🔄 เริ่มใหม่</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>หมายเหตุ: การคำนวณนี้เป็นเพียงการประมาณการเท่านั้น กรุณาตรวจสอบกับกรมสรรพากรเพื่อความถูกต้อง</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="export-pdf.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

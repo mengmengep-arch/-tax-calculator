@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ทดสอบ Sliders</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 ทดสอบ Sliders และ Checkboxes</h1>
+
+    <!-- Test 1: Basic Slider -->
+    <div class="test-section">
+        <h2>Test 1: Basic Input + Slider (Step 1 Style)</h2>
+        <div class="form-group">
+            <label for="testSalary">เงินเดือนต่อเดือน (บาท):</label>
+            <div class="input-with-slider">
+                <input type="text" id="testSalary" placeholder="เช่น 30,000">
+                <input type="range" id="testSalarySlider" min="0" max="200000" step="1000" value="30000">
+            </div>
+            <div class="slider-value">ค่าปัจจุบัน: <span id="testSalaryDisplay">30,000</span> บาท</div>
+        </div>
+        <div class="status info" id="test1Status">รอการทดสอบ...</div>
+    </div>
+
+    <!-- Test 2: Checkbox + Slider -->
+    <div class="test-section">
+        <h2>Test 2: Checkbox + Slider (Step 3 Style)</h2>
+        <div class="deduction-item">
+            <div class="item-header">
+                <input type="checkbox" id="test_lifeInsurance_check">
+                <label>เบี้ยประกันชีวิต (สูงสุด 100,000 บาท)</label>
+            </div>
+            <div class="item-slider" style="display: none;" id="test_lifeInsurance_slider">
+                <input type="range" id="test_lifeInsurance" min="0" max="100000" step="1000" value="0">
+                <span class="slider-display">0 บาท</span>
+            </div>
+        </div>
+        <div class="status info" id="test2Status">รอการทดสอบ... กรุณากาเครื่องหมาย checkbox</div>
+    </div>
+
+    <!-- Test 3: Multiple Checkboxes -->
+    <div class="test-section">
+        <h2>Test 3: Multiple Items</h2>
+        <div class="deduction-item">
+            <div class="item-header">
+                <input type="checkbox" id="test_health_check">
+                <label>เบี้ยประกันสุขภาพ (สูงสุด 25,000 บาท)</label>
+            </div>
+            <div class="item-slider" style="display: none;" id="test_health_slider">
+                <input type="range" id="test_health" min="0" max="25000" step="1000" value="0">
+                <span class="slider-display">0 บาท</span>
+            </div>
+        </div>
+
+        <div class="deduction-item">
+            <div class="item-header">
+                <input type="checkbox" id="test_rmf_check">
+                <label>กองทุน RMF (สูงสุด 500,000 บาท)</label>
+            </div>
+            <div class="item-slider" style="display: none;" id="test_rmf_slider">
+                <input type="range" id="test_rmf" min="0" max="500000" step="10000" value="0">
+                <span class="slider-display">0 บาท</span>
+            </div>
+        </div>
+
+        <div class="status success" id="test3Status">
+            <strong>สรุป:</strong><br>
+            ค่าลดหย่อนรวม: <span id="totalDeduction">0</span> บาท
+        </div>
+    </div>
+
+    <script>
+        // Import functions from script.js
+        function formatNumber(num) {
+            return num.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function parseNumberWithComma(value) {
+            if (typeof value === 'string') {
+                return parseFloat(value.replace(/,/g, '')) || 0;
+            }
+            return parseFloat(value) || 0;
+        }
+
+        // Test 1: Basic Slider
+        function setupBasicSlider() {
+            const input = document.getElementById('testSalary');
+            const slider = document.getElementById('testSalarySlider');
+            const display = document.getElementById('testSalaryDisplay');
+            const status = document.getElementById('test1Status');
+
+            slider.addEventListener('input', function() {
+                const value = this.value;
+                input.value = formatNumber(value);
+                display.textContent = formatNumber(value);
+                status.textContent = `✅ Slider ทำงาน! ค่าปัจจุบัน: ${formatNumber(value)} บาท`;
+                status.className = 'status success';
+            });
+
+            input.addEventListener('input', function() {
+                const value = parseNumberWithComma(this.value);
+                slider.value = value;
+                display.textContent = formatNumber(value);
+                status.textContent = `✅ Input ทำงาน! ค่าปัจจุบัน: ${formatNumber(value)} บาท`;
+                status.className = 'status success';
+            });
+
+            // Set initial value
+            input.value = formatNumber(slider.value);
+            display.textContent = formatNumber(slider.value);
+        }
+
+        // Test 2: Checkbox + Slider
+        function setupCheckboxSlider() {
+            const checkbox = document.getElementById('test_lifeInsurance_check');
+            const slider = document.getElementById('test_lifeInsurance');
+            const sliderDiv = document.getElementById('test_lifeInsurance_slider');
+            const displaySpan = sliderDiv.querySelector('.slider-display');
+            const status = document.getElementById('test2Status');
+
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    sliderDiv.style.display = 'flex';
+                    status.textContent = '✅ Checkbox checked! Slider แสดง';
+                    status.className = 'status success';
+                } else {
+                    sliderDiv.style.display = 'none';
+                    status.textContent = '⚠️ Checkbox unchecked! Slider ซ่อน';
+                    status.className = 'status info';
+                }
+            });
+
+            slider.addEventListener('input', function() {
+                const value = parseFloat(this.value) || 0;
+                displaySpan.textContent = formatNumber(value) + ' บาท';
+                status.textContent = `✅ Slider ทำงาน! ค่า: ${formatNumber(value)} บาท`;
+                status.className = 'status success';
+            });
+
+            // Initialize
+            displaySpan.textContent = '0 บาท';
+        }
+
+        // Test 3: Multiple Items
+        function setupMultipleItems() {
+            const items = [
+                { name: 'health', max: 25000 },
+                { name: 'rmf', max: 500000 }
+            ];
+
+            items.forEach(item => {
+                const checkbox = document.getElementById(`test_${item.name}_check`);
+                const slider = document.getElementById(`test_${item.name}`);
+                const sliderDiv = document.getElementById(`test_${item.name}_slider`);
+                const displaySpan = sliderDiv.querySelector('.slider-display');
+
+                checkbox.addEventListener('change', function() {
+                    sliderDiv.style.display = this.checked ? 'flex' : 'none';
+                    updateTotal();
+                });
+
+                slider.addEventListener('input', function() {
+                    const value = parseFloat(this.value) || 0;
+                    displaySpan.textContent = formatNumber(value) + ' บาท';
+                    updateTotal();
+                });
+
+                displaySpan.textContent = '0 บาท';
+            });
+
+            function updateTotal() {
+                let total = 0;
+                items.forEach(item => {
+                    const checkbox = document.getElementById(`test_${item.name}_check`);
+                    const slider = document.getElementById(`test_${item.name}`);
+                    if (checkbox.checked) {
+                        total += parseFloat(slider.value) || 0;
+                    }
+                });
+                document.getElementById('totalDeduction').textContent = formatNumber(total);
+            }
+        }
+
+        // Initialize all tests
+        document.addEventListener('DOMContentLoaded', function() {
+            setupBasicSlider();
+            setupCheckboxSlider();
+            setupMultipleItems();
+            console.log('✅ All tests initialized!');
+        });
+    </script>
+</body>
+</html>

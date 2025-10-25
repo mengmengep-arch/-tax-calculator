@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Test - คัดลอกมาจาก index.html</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simple Test - Step 1</h1>
+        </header>
+
+        <!-- คัดลอกมาจาก Step 1 ใน index.html -->
+        <div class="form-group">
+            <label for="salary">เงินเดือนต่อเดือน (บาท):</label>
+            <div class="input-with-slider">
+                <input type="text" id="salary" placeholder="เช่น 30,000">
+                <input type="range" id="salarySlider" min="0" max="200000" step="1000" value="30000">
+            </div>
+            <div class="slider-value">ค่าปัจจุบัน: <span id="salaryDisplay">30,000</span> บาท</div>
+        </div>
+
+        <hr>
+
+        <h1>Simple Test - Step 3</h1>
+
+        <!-- คัดลอกมาจาก Step 3 ใน index.html -->
+        <div class="deduction-item">
+            <div class="item-header">
+                <input type="checkbox" id="plan1_lifeInsurance_check">
+                <label>เบี้ยประกันชีวิต (สูงสุด 100,000 บาท)</label>
+            </div>
+            <div class="item-slider" style="display: none;" id="plan1_lifeInsurance_slider">
+                <input type="range" id="plan1_lifeInsurance" min="0" max="100000" step="1000" value="0">
+                <span class="slider-display">0 บาท</span>
+            </div>
+        </div>
+
+        <div style="background: #e3f2fd; padding: 20px; margin-top: 20px;">
+            <h3>Status:</h3>
+            <div id="status">Loading...</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+        // แสดง status เมื่อ script.js load เสร็จ
+        setTimeout(() => {
+            const status = document.getElementById('status');
+            status.innerHTML = `
+                <p>✅ Page loaded</p>
+                <p>DOMContentLoaded listeners: ${document.readyState}</p>
+                <p>Try moving the salary slider...</p>
+                <p>Try checking the checkbox...</p>
+            `;
+        }, 1000);
+    </script>
+</body>
+</html>

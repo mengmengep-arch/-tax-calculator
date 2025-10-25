@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ทดสอบ PVD และ 500K Limit</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .deduction-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .item-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .item-slider {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        input[type="range"]:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
+        input[type="range"]:disabled::-webkit-slider-thumb {
+            background: #999;
+            cursor: not-allowed;
+        }
+        .slider-display {
+            font-weight: bold;
+            color: #667eea;
+        }
+        .limit-warning {
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        .summary {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .summary h3 {
+            margin-top: 0;
+            color: #1565c0;
+        }
+        .btn-quick {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn-quick:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-reset-item {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn-reset-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+            background: linear-gradient(135deg, #ff5252 0%, #e74c3c 100%);
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 ทดสอบ PVD และวงเงิน 500,000 บาท</h1>
+
+    <div class="test-section">
+        <h2>ตั้งรายได้สุทธิ</h2>
+        <input type="number" id="netIncome" value="1000000" style="padding: 10px; width: 200px;">
+        <button class="btn-quick" onclick="updateAll()">Update</button>
+        <p>รายได้สุทธิ: <strong id="incomeDisplay">1,000,000</strong> บาท</p>
+    </div>
+
+    <div class="test-section">
+        <h2>💰 Retirement Funds (รวมไม่เกิน 500,000)</h2>
+
+        <!-- Pension Insurance -->
+        <div class="deduction-item">
+            <div class="item-header">
+                <input type="checkbox" id="test_pensionInsurance_check">
+                <label>💰 ประกันบำนาญ (15% ของรายได้, สูงสุด 200,000)</label>
+            </div>
+            <div class="item-slider" id="test_pensionInsurance_slider">
+                <input type="range" id="test_pensionInsurance" min="0" max="200000" step="10000" value="0">
+                <span class="slider-display">0 บาท</span>
+                <span class="limit-warning"></span>
+                <div>
+                    <button class="btn-quick" onclick="setQuickValue('pensionInsurance', 'percent', 15)">15%</button>
+                    <button class="btn-quick" onclick="setQuickValue('pensionInsurance', 'max-available')">Max</button>
+                    <button class="btn-reset-item" onclick="resetItemValue('pensionInsurance')">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PVD -->
+        <div class="deduction-item">
+            <div class="item-header">
+                <input type="checkbox" id="test_pvd_check">
+                <label>💰 กองทุนสำรองเลี้ยงชีพ PVD (สูงสุด 500,000)</label>
+            </div>
+            <div class="item-slider" id="test_pvd_slider">
+                <input type="range" id="test_pvd" min="0" max="500000" step="10000" value="0">
+                <span class="slider-display">0 บาท</span>
+                <span class="limit-warning"></span>
+                <div>
+                    <button class="btn-quick" onclick="setQuickValue('pvd', 'max-available')">Max</button>
+                    <button class="btn-reset-item" onclick="resetItemValue('pvd')">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RMF -->
+        <div class="deduction-item">
+            <div class="item-header">
+                <input type="checkbox" id="test_rmf_check">
+                <label>💰 กองทุน RMF (30% ของรายได้, สูงสุด 500,000)</label>
+            </div>
+            <div class="item-slider" id="test_rmf_slider">
+                <input type="range" id="test_rmf" min="0" max="500000" step="10000" value="0">
+                <span class="slider-display">0 บาท</span>
+                <span class="limit-warning"></span>
+                <div>
+                    <button class="btn-quick" onclick="setQuickValue('rmf', 'percent', 30)">30%</button>
+                    <button class="btn-quick" onclick="setQuickValue('rmf', 'max-available')">Max</button>
+                    <button class="btn-reset-item" onclick="resetItemValue('rmf')">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary">
+            <h3>📊 สรุป</h3>
+            <p>ประกันบำนาญ: <strong id="pensionValue">0</strong> บาท</p>
+            <p>PVD: <strong id="pvdValue">0</strong> บาท</p>
+            <p>RMF: <strong id="rmfValue">0</strong> บาท</p>
+            <hr>
+            <p style="font-size: 1.2rem;">รวม: <strong id="totalRetirement" style="color: #667eea;">0</strong> บาท</p>
+            <p id="limitStatus" style="font-weight: bold;"></p>
+        </div>
+    </div>
+
+    <script>
+        let netIncomeValue = 1000000;
+
+        function formatNumber(num) {
+            const n = parseFloat(num);
+            if (isNaN(n)) return '0';
+            return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function getAvailableRetirementLimit(currentItem) {
+            const RETIREMENT_LIMIT = 500000;
+            let used = 0;
+            const retirementItems = ['pensionInsurance', 'pvd', 'rmf'];
+
+            retirementItems.forEach(item => {
+                if (item === currentItem) return;
+                const checkbox = document.getElementById(`test_${item}_check`);
+                const slider = document.getElementById(`test_${item}`);
+                if (checkbox && slider && checkbox.checked) {
+                    used += parseFloat(slider.value) || 0;
+                }
+            });
+
+            return Math.max(0, RETIREMENT_LIMIT - used);
+        }
+
+        // อัพเดต slider limits แบบไดนามิก
+        function updateRetirementSliderLimits() {
+            const RETIREMENT_LIMIT = 500000;
+            const retirementItems = ['pensionInsurance', 'pvd', 'rmf'];
+
+            retirementItems.forEach(item => {
+                const checkbox = document.getElementById(`test_${item}_check`);
+                const slider = document.getElementById(`test_${item}`);
+                const sliderDiv = document.getElementById(`test_${item}_slider`);
+
+                if (!checkbox || !slider || !sliderDiv) return;
+
+                let currentValue = parseFloat(slider.value) || 0;
+
+                // คำนวณ max ที่แท้จริงของแต่ละรายการ
+                let itemMax = 500000;
+                if (item === 'pensionInsurance') {
+                    itemMax = Math.min(netIncomeValue * 0.15, 200000);
+                } else if (item === 'pvd') {
+                    itemMax = 500000;
+                } else if (item === 'rmf') {
+                    itemMax = Math.min(netIncomeValue * 0.30, 500000);
+                }
+
+                // ถ้า current value เกิน itemMax ให้รีเซ็ตเป็น 0
+                if (currentValue > itemMax) {
+                    currentValue = 0;
+                    slider.value = 0;
+                    const displaySpan = sliderDiv.querySelector('.slider-display');
+                    if (displaySpan) displaySpan.textContent = '0 บาท';
+                }
+
+                const available = getAvailableRetirementLimit(item);
+
+                // ตั้ง max ของ slider = available (ไม่ต้องบวก currentValue เพราะ available คือที่ใช้ได้ทั้งหมดแล้ว)
+                const newMax = Math.min(itemMax, available);
+                slider.max = newMax;
+
+                // ⚠️ CRITICAL: ถ้า current value เกิน newMax ให้ลดลงมา
+                if (currentValue > newMax) {
+                    slider.value = newMax;
+                    currentValue = newMax;
+                    const displaySpan = sliderDiv.querySelector('.slider-display');
+                    if (displaySpan) displaySpan.textContent = formatNumber(newMax) + ' บาท';
+                }
+
+                // ถ้า available = 0 และ current = 0 ก็ disable
+                if (available === 0 && currentValue === 0) {
+                    slider.disabled = true;
+                    slider.style.opacity = '0.5';
+                    slider.style.cursor = 'not-allowed';
+                } else {
+                    slider.disabled = false;
+                    slider.style.opacity = '1';
+                    slider.style.cursor = 'pointer';
+                }
+            });
+        }
+
+        function updateRetirementWarnings() {
+            const RETIREMENT_LIMIT = 500000;
+            const retirementItems = ['pensionInsurance', 'pvd', 'rmf'];
+            let totalUsed = 0;
+
+            retirementItems.forEach(item => {
+                const checkbox = document.getElementById(`test_${item}_check`);
+                const slider = document.getElementById(`test_${item}`);
+                if (checkbox && slider && checkbox.checked) {
+                    totalUsed += parseFloat(slider.value) || 0;
+                }
+            });
+
+            retirementItems.forEach(item => {
+                const checkbox = document.getElementById(`test_${item}_check`);
+                const slider = document.getElementById(`test_${item}`);
+                const sliderDiv = document.getElementById(`test_${item}_slider`);
+                if (!checkbox || !sliderDiv) return;
+
+                const warningSpan = sliderDiv.querySelector('.limit-warning');
+                if (!warningSpan) return;
+
+                const currentValue = parseFloat(slider.value) || 0;
+                const available = getAvailableRetirementLimit(item);
+
+                if (checkbox.checked) {
+                    const remaining = RETIREMENT_LIMIT - totalUsed;
+
+                    if (totalUsed > RETIREMENT_LIMIT) {
+                        warningSpan.textContent = `⚠️ เกินวงเงิน 500,000! (รวม ${formatNumber(totalUsed)} บาท)`;
+                        warningSpan.style.color = '#f44336';
+                        warningSpan.style.fontWeight = 'bold';
+                    } else if (available === 0 && currentValue === 0) {
+                        warningSpan.textContent = `🚫 ไม่สามารถเลือกได้ เต็มวงเงิน 500,000 แล้ว`;
+                        warningSpan.style.color = '#f44336';
+                        warningSpan.style.fontWeight = 'bold';
+                    } else if (available === 0) {
+                        warningSpan.textContent = `⚠️ ไม่สามารถเพิ่มได้ เต็มวงเงิน 500,000 แล้ว`;
+                        warningSpan.style.color = '#ff9800';
+                        warningSpan.style.fontWeight = 'bold';
+                    } else if (remaining < 50000) {
+                        warningSpan.textContent = `⚠️ เหลือ ${formatNumber(remaining)} บาท จาก 500,000`;
+                        warningSpan.style.color = '#ff9800';
+                    } else {
+                        warningSpan.textContent = `✓ เหลือ ${formatNumber(remaining)} บาท`;
+                        warningSpan.style.color = '#4caf50';
+                    }
+                } else {
+                    warningSpan.textContent = '';
+                }
+            });
+
+            // อัพเดต slider limits
+            updateRetirementSliderLimits();
+            updateSummary(totalUsed);
+        }
+
+        function updateSummary(total) {
+            const pension = document.getElementById('test_pensionInsurance_check').checked ?
+                parseFloat(document.getElementById('test_pensionInsurance').value) : 0;
+            const pvd = document.getElementById('test_pvd_check').checked ?
+                parseFloat(document.getElementById('test_pvd').value) : 0;
+            const rmf = document.getElementById('test_rmf_check').checked ?
+                parseFloat(document.getElementById('test_rmf').value) : 0;
+
+            document.getElementById('pensionValue').textContent = formatNumber(pension);
+            document.getElementById('pvdValue').textContent = formatNumber(pvd);
+            document.getElementById('rmfValue').textContent = formatNumber(rmf);
+            document.getElementById('totalRetirement').textContent = formatNumber(total);
+
+            const limitStatus = document.getElementById('limitStatus');
+            if (total > 500000) {
+                limitStatus.textContent = '❌ เกินวงเงิน 500,000 บาท!';
+                limitStatus.style.color = '#f44336';
+            } else if (total === 500000) {
+                limitStatus.textContent = '✅ ใช้วงเงินเต็ม 500,000 บาท';
+                limitStatus.style.color = '#4caf50';
+            } else {
+                limitStatus.textContent = `✅ ภายในวงเงิน (เหลือ ${formatNumber(500000 - total)} บาท)`;
+                limitStatus.style.color = '#2196f3';
+            }
+        }
+
+        function setQuickValue(item, mode, percent) {
+            const slider = document.getElementById(`test_${item}`);
+            const sliderDiv = document.getElementById(`test_${item}_slider`);
+            const displaySpan = sliderDiv.querySelector('.slider-display');
+
+            let finalValue;
+
+            if (mode === 'max-available') {
+                const available = getAvailableRetirementLimit(item);
+
+                if (item === 'pensionInsurance') {
+                    finalValue = Math.min(netIncomeValue * 0.15, 200000, available);
+                } else if (item === 'pvd') {
+                    finalValue = Math.min(500000, available);
+                } else if (item === 'rmf') {
+                    finalValue = Math.min(netIncomeValue * 0.30, 500000, available);
+                }
+            } else if (mode === 'percent') {
+                finalValue = Math.round(netIncomeValue * (percent / 100));
+                const maxValue = parseInt(slider.max);
+                finalValue = Math.min(finalValue, maxValue);
+                const available = getAvailableRetirementLimit(item);
+                finalValue = Math.min(finalValue, available);
+            }
+
+            finalValue = Math.round(finalValue);
+            slider.value = finalValue;
+            displaySpan.textContent = formatNumber(finalValue) + ' บาท';
+            updateRetirementWarnings();
+        }
+
+        // รีเซ็ตค่าของไอเทมเป็น 0
+        function resetItemValue(item) {
+            const slider = document.getElementById(`test_${item}`);
+            const sliderDiv = document.getElementById(`test_${item}_slider`);
+            const displaySpan = sliderDiv?.querySelector('.slider-display');
+
+            if (!slider || !sliderDiv) {
+                console.error(`Cannot find elements for test_${item}`);
+                return;
+            }
+
+            // รีเซ็ตค่าเป็น 0
+            slider.value = 0;
+            if (displaySpan) displaySpan.textContent = '0 บาท';
+
+            // อัพเดต limits และ warnings
+            updateRetirementSliderLimits();
+            updateRetirementWarnings();
+
+            console.log(`✅ Reset: test_${item} = 0`);
+        }
+
+        function updateAll() {
+            netIncomeValue = parseFloat(document.getElementById('netIncome').value) || 0;
+            document.getElementById('incomeDisplay').textContent = formatNumber(netIncomeValue);
+            updateRetirementWarnings();
+        }
+
+        // Setup event listeners
+        const retirementItems = ['pensionInsurance', 'pvd', 'rmf'];
+        retirementItems.forEach(item => {
+            const checkbox = document.getElementById(`test_${item}_check`);
+            const slider = document.getElementById(`test_${item}`);
+            const sliderDiv = document.getElementById(`test_${item}_slider`);
+            const displaySpan = sliderDiv.querySelector('.slider-display');
+
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    sliderDiv.style.display = 'flex';
+                } else {
+                    sliderDiv.style.display = 'none';
+                    slider.value = 0; // รีเซ็ตเป็น 0 เมื่อยกเลิก
+                    displaySpan.textContent = '0 บาท';
+                }
+                updateRetirementSliderLimits();
+                updateRetirementWarnings();
+            });
+
+            slider.addEventListener('input', function() {
+                const value = parseFloat(this.value) || 0;
+                displaySpan.textContent = formatNumber(value) + ' บาท';
+                updateRetirementSliderLimits();
+                updateRetirementWarnings();
+            });
+        });
+
+        // Initial update
+        updateRetirementSliderLimits();
+        updateRetirementWarnings();
+        console.log('✅ Test page initialized!');
+    </script>
+</body>
+</html>

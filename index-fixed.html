@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คำนวณภาษีเงินได้บุคคลธรรมดา - พนักงานประจำ (Fixed)</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧮 คำนวณภาษีเงินได้บุคคลธรรมดา</h1>
+            <p class="subtitle">สำหรับพนักงานประจำในประเทศไทย (ปีภาษี 2568)</p>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-step active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-label">ข้อมูลรายได้</div>
+            </div>
+            <div class="progress-step" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-label">ค่าลดหย่อนพื้นฐาน</div>
+            </div>
+            <div class="progress-step" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-label">Simulation</div>
+            </div>
+            <div class="progress-step" data-step="4">
+                <div class="step-number">4</div>
+                <div class="step-label">ผลการคำนวณ</div>
+            </div>
+        </div>
+
+        <div class="wizard-container">
+            <!-- Step 1: ข้อมูลรายได้ -->
+            <div class="wizard-step active" id="step1">
+                <h2>📊 ข้อมูลรายได้</h2>
+
+                <div class="form-group">
+                    <label for="salary">เงินเดือนต่อเดือน (บาท):</label>
+                    <div class="input-with-slider">
+                        <input type="text" id="salary" value="30,000">
+                        <input type="range" id="salarySlider" min="0" max="200000" step="1000" value="30000">
+                    </div>
+                    <div class="slider-value">ค่าปัจจุบัน: <span id="salaryDisplay">30,000</span> บาท</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bonus">โบนัสรวมต่อปี (บาท):</label>
+                    <div class="input-with-slider">
+                        <input type="text" id="bonus" value="0">
+                        <input type="range" id="bonusSlider" min="0" max="500000" step="10000" value="0">
+                    </div>
+                    <div class="slider-value">ค่าปัจจุบัน: <span id="bonusDisplay">0</span> บาท</div>
+                </div>
+
+                <div class="info-box">
+                    <h4>📋 สรุปรายได้</h4>
+                    <p>รายได้รวมต่อปี: <strong id="totalIncomePreview">360,000</strong> บาท</p>
+                    <p>ค่าใช้จ่าย 50% (สูงสุด 100,000): <strong id="expensesPreview">100,000</strong> บาท</p>
+                    <p>รายได้สุทธิ: <strong id="netIncomePreview">260,000</strong> บาท</p>
+                </div>
+
+                <button class="btn-next" onclick="alert('Moving to step 2...')">ถัดไป →</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Inline script for testing -->
+    <script>
+        console.log('🔥 INLINE SCRIPT STARTING...');
+
+        function formatNumber(num) {
+            return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function parseNumber(str) {
+            return parseFloat(str.replace(/,/g, '')) || 0;
+        }
+
+        // Test if elements exist
+        console.log('Checking elements...');
+        console.log('salary:', document.getElementById('salary'));
+        console.log('salarySlider:', document.getElementById('salarySlider'));
+        console.log('salaryDisplay:', document.getElementById('salaryDisplay'));
+
+        // Setup salary slider
+        const salaryInput = document.getElementById('salary');
+        const salarySlider = document.getElementById('salarySlider');
+        const salaryDisplay = document.getElementById('salaryDisplay');
+
+        if (salaryInput && salarySlider && salaryDisplay) {
+            console.log('✅ All salary elements found!');
+
+            // Slider changes input
+            salarySlider.addEventListener('input', function() {
+                console.log('🎚️ Salary slider moved to:', this.value);
+                const val = this.value;
+                salaryInput.value = formatNumber(val);
+                salaryDisplay.textContent = formatNumber(val);
+                updateIncomePreview();
+            });
+
+            // Input changes slider
+            salaryInput.addEventListener('input', function() {
+                console.log('⌨️ Salary input changed to:', this.value);
+                const val = parseNumber(this.value);
+                salarySlider.value = val;
+                salaryDisplay.textContent = formatNumber(val);
+                updateIncomePreview();
+            });
+
+            console.log('✅ Salary slider listeners attached!');
+        } else {
+            console.error('❌ Some salary elements missing!');
+        }
+
+        // Setup bonus slider
+        const bonusInput = document.getElementById('bonus');
+        const bonusSlider = document.getElementById('bonusSlider');
+        const bonusDisplay = document.getElementById('bonusDisplay');
+
+        if (bonusInput && bonusSlider && bonusDisplay) {
+            bonusSlider.addEventListener('input', function() {
+                const val = this.value;
+                bonusInput.value = formatNumber(val);
+                bonusDisplay.textContent = formatNumber(val);
+                updateIncomePreview();
+            });
+
+            bonusInput.addEventListener('input', function() {
+                const val = parseNumber(this.value);
+                bonusSlider.value = val;
+                bonusDisplay.textContent = formatNumber(val);
+                updateIncomePreview();
+            });
+
+            console.log('✅ Bonus slider listeners attached!');
+        }
+
+        function updateIncomePreview() {
+            const salary = parseNumber(salaryInput.value);
+            const bonus = parseNumber(bonusInput.value);
+            const totalIncome = (salary * 12) + bonus;
+            const expenses = Math.min(totalIncome * 0.5, 100000);
+            const netIncome = totalIncome - expenses;
+
+            document.getElementById('totalIncomePreview').textContent = formatNumber(totalIncome);
+            document.getElementById('expensesPreview').textContent = formatNumber(expenses);
+            document.getElementById('netIncomePreview').textContent = formatNumber(netIncome);
+
+            console.log('📊 Updated preview:', {totalIncome, expenses, netIncome});
+        }
+
+        // Initial update
+        updateIncomePreview();
+
+        console.log('✅ INLINE SCRIPT COMPLETE!');
+    </script>
+</body>
+</html>

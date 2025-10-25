@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ทดสอบการคำนวณภาษี</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-case {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-case h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .result {
+            background: #e8f5e9;
+            padding: 10px;
+            border-left: 4px solid #4caf50;
+            margin: 10px 0;
+        }
+        .expected {
+            background: #fff3e0;
+            padding: 10px;
+            border-left: 4px solid #ff9800;
+            margin: 10px 0;
+        }
+        .pass {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        .fail {
+            color: #f44336;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        table td:first-child {
+            font-weight: 500;
+            color: #666;
+        }
+        table td:last-child {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 ทดสอบการคำนวณภาษี</h1>
+
+    <div id="test-results"></div>
+
+    <script>
+        // คัดลอกมาจาก script.js
+        const TAX_BRACKETS = [
+            { min: 0, max: 150000, rate: 0 },
+            { min: 150000, max: 300000, rate: 5 },
+            { min: 300000, max: 500000, rate: 10 },
+            { min: 500000, max: 750000, rate: 15 },
+            { min: 750000, max: 1000000, rate: 20 },
+            { min: 1000000, max: 2000000, rate: 25 },
+            { min: 2000000, max: 5000000, rate: 30 },
+            { min: 5000000, max: Infinity, rate: 35 }
+        ];
+
+        function formatNumber(num) {
+            return num.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function calculateTax(netIncome, totalDeduction) {
+            const taxableIncome = Math.max(netIncome - totalDeduction, 0);
+            let totalTax = 0;
+
+            for (let bracket of TAX_BRACKETS) {
+                if (taxableIncome <= bracket.min) break;
+
+                // คำนวณรายได้ที่ต้องเสียภาษีในช่วงนี้
+                const incomeInBracket = Math.min(taxableIncome, bracket.max) - bracket.min;
+
+                if (incomeInBracket > 0) {
+                    const taxAtThisRate = incomeInBracket * (bracket.rate / 100);
+                    totalTax += taxAtThisRate;
+                }
+            }
+
+            return Math.round(totalTax);
+        }
+
+        function calculateTaxDetailed(netIncome, totalDeduction) {
+            const taxableIncome = Math.max(netIncome - totalDeduction, 0);
+            let totalTax = 0;
+            let breakdown = [];
+
+            for (let bracket of TAX_BRACKETS) {
+                if (taxableIncome <= bracket.min) break;
+
+                const incomeInBracket = Math.min(taxableIncome, bracket.max) - bracket.min;
+
+                if (incomeInBracket > 0) {
+                    const taxAtThisRate = incomeInBracket * (bracket.rate / 100);
+                    totalTax += taxAtThisRate;
+                    breakdown.push({
+                        range: `${formatNumber(bracket.min + 1)} - ${formatNumber(bracket.max)}`,
+                        rate: bracket.rate,
+                        income: incomeInBracket,
+                        tax: taxAtThisRate
+                    });
+                }
+            }
+
+            return { totalTax: Math.round(totalTax), breakdown };
+        }
+
+        // Test Cases
+        const testCases = [
+            {
+                name: "กรณีทดสอบ 1: เงินเดือน 50,000/เดือน + โบนัส 100,000",
+                salary: 50000,
+                bonus: 100000,
+                deductions: 69000,
+                expectedTax: 32150
+            },
+            {
+                name: "กรณีทดสอบ 2: เงินเดือน 30,000/เดือน ไม่มีโบนัส",
+                salary: 30000,
+                bonus: 0,
+                deductions: 69000,
+                expectedTax: 4550
+            },
+            {
+                name: "กรณีทดสอบ 3: เงินเดือน 100,000/เดือน + โบนัส 200,000",
+                salary: 100000,
+                bonus: 200000,
+                deductions: 69000,
+                expectedTax: 161150
+            },
+            {
+                name: "กรณีทดสอบ 4: รายได้ต่ำ (ไม่ต้องเสียภาษี)",
+                salary: 15000,
+                bonus: 0,
+                deductions: 69000,
+                expectedTax: 0
+            }
+        ];
+
+        let resultsHTML = '';
+
+        testCases.forEach((testCase, index) => {
+            const totalIncome = (testCase.salary * 12) + testCase.bonus;
+            const expenses = Math.min(totalIncome * 0.5, 100000);
+            const netIncome = totalIncome - expenses;
+            const taxableIncome = netIncome - testCase.deductions;
+
+            const result = calculateTaxDetailed(netIncome, testCase.deductions);
+            const actualTax = result.totalTax;
+            const passed = actualTax === testCase.expectedTax;
+
+            resultsHTML += `
+                <div class="test-case">
+                    <h3>${testCase.name}</h3>
+
+                    <table>
+                        <tr>
+                            <td>เงินเดือน/เดือน:</td>
+                            <td>${formatNumber(testCase.salary)} บาท</td>
+                        </tr>
+                        <tr>
+                            <td>โบนัส/ปี:</td>
+                            <td>${formatNumber(testCase.bonus)} บาท</td>
+                        </tr>
+                        <tr>
+                            <td>รายได้รวม/ปี:</td>
+                            <td>${formatNumber(totalIncome)} บาท</td>
+                        </tr>
+                        <tr>
+                            <td>ค่าใช้จ่าย 50% (สูงสุด 100,000):</td>
+                            <td>${formatNumber(expenses)} บาท</td>
+                        </tr>
+                        <tr>
+                            <td>รายได้สุทธิ:</td>
+                            <td>${formatNumber(netIncome)} บาท</td>
+                        </tr>
+                        <tr>
+                            <td>ค่าลดหย่อน:</td>
+                            <td>${formatNumber(testCase.deductions)} บาท</td>
+                        </tr>
+                        <tr>
+                            <td><strong>รายได้หลังหักลดหย่อน:</strong></td>
+                            <td><strong>${formatNumber(taxableIncome)} บาท</strong></td>
+                        </tr>
+                    </table>
+
+                    <h4>รายละเอียดการคำนวณภาษี:</h4>
+                    <table>
+                        ${result.breakdown.map(b => `
+                            <tr>
+                                <td>${b.range} (${b.rate}%)</td>
+                                <td>${formatNumber(b.income)} × ${b.rate}% = ${formatNumber(b.tax)} บาท</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+
+                    <div class="expected">
+                        <strong>ผลที่คาดหวัง:</strong> ${formatNumber(testCase.expectedTax)} บาท/ปี
+                        (${formatNumber(Math.round(testCase.expectedTax / 12))} บาท/เดือน)
+                    </div>
+
+                    <div class="result">
+                        <strong>ผลจากโปรแกรม:</strong> ${formatNumber(actualTax)} บาท/ปี
+                        (${formatNumber(Math.round(actualTax / 12))} บาท/เดือน)
+                    </div>
+
+                    <p class="${passed ? 'pass' : 'fail'}">
+                        ${passed ? '✅ PASS - การคำนวณถูกต้อง!' : '❌ FAIL - การคำนวณไม่ถูกต้อง'}
+                    </p>
+                </div>
+            `;
+        });
+
+        document.getElementById('test-results').innerHTML = resultsHTML;
+    </script>
+</body>
+</html>
