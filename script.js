@@ -54,6 +54,98 @@ function calculateTax(netIncome, totalDeduction) {
     return Math.round(totalTax);
 }
 
+// =============== Auto Save/Load for Step 3 ===============
+
+function savePlanData() {
+    try {
+        const planData = {
+            plan1: {},
+            plan2: {}
+        };
+
+        // รายการค่าลดหย่อนทั้งหมด
+        const deductionItems = [
+            'lifeInsurance', 'healthInsurance', 'pensionInsurance',
+            'rmf', 'ssf', 'thaiEsg', 'thaiEsgx',
+            'pensionInsuranceSpouse', 'lifeInsuranceParents',
+            'eReceipt', 'donation2x'
+        ];
+
+        // บันทึกค่าของทั้ง Plan 1 และ Plan 2
+        ['plan1', 'plan2'].forEach(plan => {
+            deductionItems.forEach(item => {
+                const checkbox = document.getElementById(`${plan}_${item}_check`);
+                const slider = document.getElementById(`${plan}_${item}`);
+
+                if (checkbox && slider) {
+                    planData[plan][item] = {
+                        checked: checkbox.checked,
+                        value: parseFloat(slider.value) || 0
+                    };
+                }
+            });
+        });
+
+        localStorage.setItem('taxCalc_planData', JSON.stringify(planData));
+        console.log('💾 Saved plan data:', planData);
+    } catch (e) {
+        console.error('❌ Error saving plan data:', e);
+    }
+}
+
+function loadPlanData() {
+    try {
+        const saved = localStorage.getItem('taxCalc_planData');
+        if (!saved) {
+            console.log('📂 No saved plan data found');
+            return;
+        }
+
+        const planData = JSON.parse(saved);
+        console.log('📂 Loading plan data:', planData);
+
+        // โหลดค่ากลับมาทั้ง Plan 1 และ Plan 2
+        ['plan1', 'plan2'].forEach(plan => {
+            if (!planData[plan]) return;
+
+            Object.keys(planData[plan]).forEach(item => {
+                const data = planData[plan][item];
+                const checkbox = document.getElementById(`${plan}_${item}_check`);
+                const slider = document.getElementById(`${plan}_${item}`);
+                const row = document.getElementById(`${plan}_${item}_row`);
+
+                if (checkbox && slider && data) {
+                    // ตั้งค่า checkbox
+                    checkbox.checked = data.checked;
+
+                    // ตั้งค่า slider
+                    slider.value = data.value;
+
+                    // อัพเดต display
+                    const displaySpan = document.getElementById(`${plan}_${item}_display`);
+                    if (displaySpan) {
+                        displaySpan.textContent = formatNumber(data.value);
+                    }
+
+                    // แสดง/ซ่อน row ตาม checkbox
+                    if (row) {
+                        row.style.display = data.checked ? 'grid' : 'none';
+                    }
+                }
+            });
+        });
+
+        // อัพเดต slider limits และ calculations
+        updateSliderLimits('plan1');
+        updateSliderLimits('plan2');
+        updateAllScenarios();
+
+        console.log('✅ Plan data loaded successfully');
+    } catch (e) {
+        console.error('❌ Error loading plan data:', e);
+    }
+}
+
 // =============== Step Navigation ===============
 
 function nextStep(step) {
@@ -1467,6 +1559,10 @@ function initializeApp() {
     console.log('💾 Loading saved data...');
     loadSavedData();
 
+    // Load Step 3 plan data (Plan 1 & Plan 2)
+    console.log('📂 Loading Step 3 plan data...');
+    loadPlanData();
+
     // Check if data from salary slips
     checkAndLoadSalarySlipsData();
 
@@ -1721,6 +1817,9 @@ function toggleDeductionRow(plan, item) {
 
     // อัพเดตการคำนวณ
     updateAllScenarios();
+
+    // บันทึกข้อมูลอัตโนมัติ
+    savePlanData();
 }
 
 function updateDeductionValue(plan, item) {
@@ -1744,6 +1843,9 @@ function updateDeductionValue(plan, item) {
 
     // อัพเดตการคำนวณ
     updateAllScenarios();
+
+    // บันทึกข้อมูลอัตโนมัติ
+    savePlanData();
 }
 
 // ฟังก์ชันสำหรับอัพเดต max ของ slider ตามลิมิตที่เหลือ
