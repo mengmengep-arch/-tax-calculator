@@ -1593,6 +1593,10 @@ function initializeApp() {
     updateRetirementSliderLimits('plan2');
     updateRetirementWarnings('plan2');
 
+    // อัพเดตการคำนวณ Step 3 & 4
+    console.log('🧮 Updating scenarios...');
+    updateAllScenarios();
+
     console.log('✅ Application ready!');
 }
 
@@ -2093,6 +2097,14 @@ function loadSavedData() {
             document.getElementById('bonusSlider').value = data.bonus;
             document.getElementById('bonusDisplay').textContent = formatNumber(data.bonus);
         }
+        // โหลดข้อมูลกลับเข้า global variable
+        incomeData = {
+            salary: data.salary || 0,
+            bonus: data.bonus || 0,
+            totalIncome: data.totalIncome || 0,
+            expenses: data.expenses || 0,
+            netIncome: data.netIncome || 0
+        };
     }
 
     // Load basic deductions
@@ -2104,6 +2116,7 @@ function loadSavedData() {
             document.getElementById('childSlider').value = data.childCount;
             document.getElementById('childCount').value = data.childCount;
             document.getElementById('childDisplay').textContent = data.childCount;
+            document.getElementById('childDeductionDisplay').textContent = formatNumber(data.childCount * 30000);
         }
         if (data.parentDeduction) {
             document.getElementById('parentDeduction').checked = data.parentDeduction;
@@ -2121,6 +2134,18 @@ function loadSavedData() {
             document.getElementById('socialSecurity').value = formatNumber(value);
             document.getElementById('socialSecurityDisplay').textContent = formatNumber(value);
         }
+
+        // คำนวณและโหลดกลับเข้า global variable
+        let total = 60000; // ส่วนตัว
+        if (data.spouseDeduction) total += 60000;
+        total += (data.childCount || 0) * 30000;
+        if (data.parentDeduction) total += parseInt(data.parentCount || 1) * 30000;
+        if (data.parentSpouseDeduction) total += parseInt(data.parentSpouseCount || 1) * 30000;
+        if (data.socialSecurity) {
+            const socialSecurity = Math.min(parseNumberWithComma(data.socialSecurity) * 12, 10000);
+            total += socialSecurity;
+        }
+        basicDeductions = { total };
     }
 
     updateIncomePreview();
