@@ -112,7 +112,7 @@ function loadPlanData() {
                 const data = planData[plan][item];
                 const checkbox = document.getElementById(`${plan}_${item}_check`);
                 const slider = document.getElementById(`${plan}_${item}`);
-                const row = document.getElementById(`${plan}_${item}_row`);
+                const container = document.getElementById(`${plan}_${item}_container`);
 
                 if (checkbox && slider && data) {
                     // ตั้งค่า checkbox
@@ -127,9 +127,9 @@ function loadPlanData() {
                         displaySpan.textContent = formatNumber(data.value);
                     }
 
-                    // แสดง/ซ่อน row ตาม checkbox
-                    if (row) {
-                        row.style.display = data.checked ? 'grid' : 'none';
+                    // แสดง/ซ่อน slider container ตาม checkbox
+                    if (container) {
+                        container.style.display = data.checked ? 'block' : 'none';
                     }
                 }
             });
