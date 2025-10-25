@@ -754,7 +754,10 @@ small {
 /* Comparison Table */
 .comparison-table-container {
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 600px;
     margin-bottom: 30px;
+    position: relative;
 }
 
 .deduction-comparison-table {
@@ -768,6 +771,9 @@ small {
 
 .deduction-comparison-table thead {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .deduction-comparison-table thead th {
@@ -776,6 +782,7 @@ small {
     font-size: 1.05rem;
     color: white;
     border-bottom: 3px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .deduction-comparison-table tbody tr {
