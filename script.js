@@ -458,6 +458,11 @@ function updateBasicDeductionPreview() {
     document.getElementById('basicDeductionPreview').textContent = formatNumber(total);
 }
 
+function updateAndSaveBasicDeductions() {
+    updateBasicDeductionPreview();
+    saveBasicDeductions();
+}
+
 // =============== Step 3: Simulation ===============
 
 function switchScenario(scenario) {
@@ -1528,24 +1533,24 @@ function initializeApp() {
     setupSlider('childCount', 'childSlider', 'childDisplay', function() {
         const count = document.getElementById('childSlider').value;
         document.getElementById('childDeductionDisplay').textContent = formatNumber(count * 30000);
-        updateBasicDeductionPreview();
+        updateAndSaveBasicDeductions();
     });
-    setupSlider('socialSecurity', 'socialSecuritySlider', 'socialSecurityDisplay', updateBasicDeductionPreview);
+    setupSlider('socialSecurity', 'socialSecuritySlider', 'socialSecurityDisplay', updateAndSaveBasicDeductions);
 
     // Parent options toggle
     document.getElementById('parentDeduction').addEventListener('change', function() {
         document.getElementById('parentOptions').style.display = this.checked ? 'block' : 'none';
-        updateBasicDeductionPreview();
+        updateAndSaveBasicDeductions();
     });
 
     document.getElementById('parentSpouseDeduction').addEventListener('change', function() {
         document.getElementById('parentSpouseOptions').style.display = this.checked ? 'block' : 'none';
-        updateBasicDeductionPreview();
+        updateAndSaveBasicDeductions();
     });
 
-    document.getElementById('spouseDeduction').addEventListener('change', updateBasicDeductionPreview);
-    document.getElementById('parentCount').addEventListener('change', updateBasicDeductionPreview);
-    document.getElementById('parentSpouseCount').addEventListener('change', updateBasicDeductionPreview);
+    document.getElementById('spouseDeduction').addEventListener('change', updateAndSaveBasicDeductions);
+    document.getElementById('parentCount').addEventListener('change', updateAndSaveBasicDeductions);
+    document.getElementById('parentSpouseCount').addEventListener('change', updateAndSaveBasicDeductions);
 
     // Step 3: Plan 1 checkboxes and sliders
     console.log('🟢 Setting up Plan 1 items...');
