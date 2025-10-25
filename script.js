@@ -414,7 +414,7 @@ function saveBasicDeductions() {
         total += parentSpouseCount * 30000;
     }
 
-    const socialSecurity = Math.min(parseNumberWithComma(document.getElementById('socialSecurity').value), 10000);
+    const socialSecurity = Math.min(parseNumberWithComma(document.getElementById('socialSecurity').value) * 12, 10000);
     total += socialSecurity;
 
     basicDeductions = { total };
@@ -452,7 +452,7 @@ function updateBasicDeductionPreview() {
         total += parentSpouseCount * 30000;
     }
 
-    const socialSecurity = Math.min(parseNumberWithComma(document.getElementById('socialSecurity').value || 0), 10000);
+    const socialSecurity = Math.min(parseNumberWithComma(document.getElementById('socialSecurity').value || 0) * 12, 10000);
     total += socialSecurity;
 
     document.getElementById('basicDeductionPreview').textContent = formatNumber(total);
