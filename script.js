@@ -63,12 +63,11 @@ function savePlanData() {
             plan2: {}
         };
 
-        // รายการค่าลดหย่อนทั้งหมด
+        // รายการค่าลดหย่อนทั้งหมด (ต้องตรงกับ setupPlanItems)
         const deductionItems = [
             'lifeInsurance', 'healthInsurance', 'pensionInsurance',
-            'rmf', 'ssf', 'thaiEsg', 'thaiEsgx',
-            'pensionInsuranceSpouse', 'lifeInsuranceParents',
-            'eReceipt', 'donation2x'
+            'pvd', 'rmf', 'thaiEsg', 'thaiEsgx',
+            'homeLoan', 'donationDouble', 'donationPolitical', 'easyEreceipt'
         ];
 
         // บันทึกค่าของทั้ง Plan 1 และ Plan 2
