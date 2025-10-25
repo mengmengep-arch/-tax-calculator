@@ -140,6 +140,10 @@ function loadPlanData() {
         updateSliderLimits('plan2');
         updateAllScenarios();
 
+        // บันทึกข้อมูลกลับเข้า localStorage เพื่อให้ตรงกับ UI
+        // (เพราะการตั้งค่า checkbox.checked และ slider.value ไม่ trigger event listeners)
+        savePlanData();
+
         console.log('✅ Plan data loaded successfully');
     } catch (e) {
         console.error('❌ Error loading plan data:', e);
@@ -2105,6 +2109,9 @@ function loadSavedData() {
             expenses: data.expenses || 0,
             netIncome: data.netIncome || 0
         };
+
+        // บันทึกข้อมูลกลับเข้า localStorage เพื่อให้ตรงกับ UI
+        saveIncomeData();
     }
 
     // Load basic deductions
@@ -2146,6 +2153,10 @@ function loadSavedData() {
             total += socialSecurity;
         }
         basicDeductions = { total };
+
+        // บันทึกข้อมูลกลับเข้า localStorage เพื่อให้ตรงกับ UI
+        // (เพราะการตั้งค่า checkbox.checked และ slider.value ไม่ trigger event listeners)
+        saveBasicDeductions();
     }
 
     updateIncomePreview();
