@@ -758,15 +758,16 @@ small {
     max-height: 600px;
     margin-bottom: 30px;
     position: relative;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    background: white;
 }
 
 .deduction-comparison-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 .deduction-comparison-table thead {
@@ -785,13 +786,16 @@ small {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.deduction-comparison-table tbody tr {
-    border-bottom: 1px solid #e0e0e0;
-    transition: background-color 0.2s ease;
+.deduction-comparison-table thead th:first-child {
+    border-top-left-radius: 12px;
 }
 
-.deduction-comparison-table tbody tr:last-child {
-    border-bottom: none;
+.deduction-comparison-table thead th:last-child {
+    border-top-right-radius: 12px;
+}
+
+.deduction-comparison-table tbody tr {
+    transition: background-color 0.2s ease;
 }
 
 .deduction-comparison-table tbody tr:hover {
@@ -800,7 +804,12 @@ small {
 
 .deduction-comparison-table td {
     padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
     vertical-align: top;
+}
+
+.deduction-comparison-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
 .deduction-comparison-table .item-name {
