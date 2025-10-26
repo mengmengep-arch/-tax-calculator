@@ -1904,19 +1904,61 @@ function updateSliderLimits(plan) {
     const rmfSlider = document.getElementById(`${plan}_rmf`);
 
     if (pensionSlider && pvdSlider && rmfSlider) {
-        const pensionValue = pensionCheck ? (parseFloat(pensionSlider.value) || 0) : 0;
-        const pvdValue = pvdCheck ? (parseFloat(pvdSlider.value) || 0) : 0;
-        const rmfValue = rmfCheck ? (parseFloat(rmfSlider.value) || 0) : 0;
+        let pensionValue = pensionCheck ? (parseFloat(pensionSlider.value) || 0) : 0;
+        let pvdValue = pvdCheck ? (parseFloat(pvdSlider.value) || 0) : 0;
+        let rmfValue = rmfCheck ? (parseFloat(rmfSlider.value) || 0) : 0;
 
-        const totalRetirement = pensionValue + pvdValue + rmfValue;
+        let totalRetirement = pensionValue + pvdValue + rmfValue;
 
         // คำนวณ max แต่ละตัวตามเงื่อนไขเดี่ยว
         const pensionIndividualMax = Math.min(netIncome * 0.15, 200000);
         const pvdIndividualMax = 500000;
         const rmfIndividualMax = Math.min(netIncome * 0.30, 500000);
 
+        // ⚠️ CRITICAL: ถ้ารวมเกิน 500k ให้ลดค่าลงตามลำดับ (rmf → pvd → pension)
+        if (totalRetirement > 500000) {
+            const excess = totalRetirement - 500000;
+            let adjusted = false;
+
+            // ลด RMF ก่อน
+            if (rmfValue > 0) {
+                const rmfReduction = Math.min(rmfValue, excess);
+                rmfValue -= rmfReduction;
+                rmfSlider.value = rmfValue;
+                document.getElementById(`${plan}_rmf_display`).textContent = formatNumber(rmfValue);
+                totalRetirement -= rmfReduction;
+                adjusted = true;
+            }
+
+            // ถ้ายังเกินอยู่ ลด PVD
+            if (totalRetirement > 500000 && pvdValue > 0) {
+                const excess2 = totalRetirement - 500000;
+                const pvdReduction = Math.min(pvdValue, excess2);
+                pvdValue -= pvdReduction;
+                pvdSlider.value = pvdValue;
+                document.getElementById(`${plan}_pvd_display`).textContent = formatNumber(pvdValue);
+                totalRetirement -= pvdReduction;
+                adjusted = true;
+            }
+
+            // ถ้ายังเกินอยู่ ลด ประกันบำนาญ
+            if (totalRetirement > 500000 && pensionValue > 0) {
+                const excess3 = totalRetirement - 500000;
+                const pensionReduction = Math.min(pensionValue, excess3);
+                pensionValue -= pensionReduction;
+                pensionSlider.value = pensionValue;
+                document.getElementById(`${plan}_pensionInsurance_display`).textContent = formatNumber(pensionValue);
+                totalRetirement -= pensionReduction;
+                adjusted = true;
+            }
+
+            // บันทึกกลับเข้า localStorage ถ้ามีการปรับค่า
+            if (adjusted) {
+                savePlanData();
+            }
+        }
+
         // Max ที่ใช้ได้จริง = min(ลิมิตเดี่ยว, ค่าปัจจุบัน + ที่เหลือในกลุ่ม 500K)
-        // คำนวณว่าแต่ละตัวลากได้สูงสุดเท่าไร โดยไม่ให้รวมเกิน 500,000
         const pensionMax = Math.min(pensionIndividualMax, pensionValue + Math.max(0, 500000 - totalRetirement));
         const pvdMax = Math.min(pvdIndividualMax, pvdValue + Math.max(0, 500000 - totalRetirement));
         const rmfMax = Math.min(rmfIndividualMax, rmfValue + Math.max(0, 500000 - totalRetirement));
@@ -1927,7 +1969,7 @@ function updateSliderLimits(plan) {
 
         console.log(`${plan} กลุ่ม500K: pension=${pensionValue}/${pensionMax}, pvd=${pvdValue}/${pvdMax}, rmf=${rmfValue}/${rmfMax}, total=${totalRetirement}/500000`);
 
-        // ถ้าค่าปัจจุบันเกิน max ใหม่ ให้ลดลง
+        // ถ้าค่าปัจจุบันเกิน max ใหม่ ให้ลดลง (สำหรับเคสอื่นๆ)
         if (pensionValue > pensionMax) {
             pensionSlider.value = pensionMax;
             document.getElementById(`${plan}_pensionInsurance_display`).textContent = formatNumber(pensionMax);
