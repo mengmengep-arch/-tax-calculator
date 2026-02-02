@@ -176,12 +176,26 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="childCount">จำนวนบุตร (คนละ 30,000 บาท):</label>
-                    <div class="input-with-slider">
-                        <input type="text" id="childCount" value="0" readonly>
-                        <input type="range" id="childSlider" min="0" max="5" step="1" value="0">
+                    <label for="childCount">จำนวนบุตร:</label>
+                    <div class="child-deduction-grid">
+                        <div class="child-input-group">
+                            <label class="child-label">บุตรคนแรก / เกิดก่อนปี 2561 (30,000 บาท/คน)</label>
+                            <div class="input-with-slider">
+                                <input type="text" id="childCount" value="0" readonly>
+                                <input type="range" id="childSlider" min="0" max="5" step="1" value="0">
+                            </div>
+                            <div class="slider-value">จำนวน: <span id="childDisplay">0</span> คน</div>
+                        </div>
+                        <div class="child-input-group">
+                            <label class="child-label">บุตรคนที่ 2+ เกิดปี 2561 เป็นต้นไป (60,000 บาท/คน)</label>
+                            <div class="input-with-slider">
+                                <input type="text" id="childCount2561" value="0" readonly>
+                                <input type="range" id="childSlider2561" min="0" max="5" step="1" value="0">
+                            </div>
+                            <div class="slider-value">จำนวน: <span id="childDisplay2561">0</span> คน</div>
+                        </div>
                     </div>
-                    <div class="slider-value">จำนวน: <span id="childDisplay">0</span> คน (ลดหย่อน: <span id="childDeductionDisplay">0</span> บาท)</div>
+                    <div class="slider-value child-total">รวมลดหย่อนบุตร: <span id="childDeductionDisplay">0</span> บาท</div>
                 </div>
 
                 <div class="form-group">
@@ -207,6 +221,21 @@
                             <option value="1">1 คน (30,000 บาท)</option>
                             <option value="2">2 คน (60,000 บาท)</option>
                         </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="parentHealthInsurance">
+                        ประกันสุขภาพบิดามารดา (สูงสุด 15,000 บาท)
+                    </label>
+                    <div class="sub-option" id="parentHealthInsuranceOptions" style="display: none;">
+                        <div class="input-with-slider">
+                            <input type="text" id="parentHealthInsuranceAmount" placeholder="0 - 15,000" value="0">
+                            <input type="range" id="parentHealthInsuranceSlider" min="0" max="15000" step="500" value="0">
+                        </div>
+                        <div class="slider-value">ค่าปัจจุบัน: <span id="parentHealthInsuranceDisplay">0</span> บาท</div>
+                        <small>เบี้ยประกันสุขภาพบิดามารดาตนเองและคู่สมรส</small>
                     </div>
                 </div>
 
