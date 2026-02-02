@@ -3,7 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จัดการสลิปเงินเดือน - ปี 2568</title>
+    <title>จัดการสลิปเงินเดือน - ปี 2569</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="จัดการสลิปเงินเดือนและคำนวณรายได้รวมทั้งปี">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="สลิปเงินเดือน">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Favicon & App Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-96x96.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+
     <link rel="stylesheet" href="styles.css">
     <style>
         .salary-container {
@@ -614,5 +630,20 @@
     <script src="export-pdf.js"></script>
 
     <script src="salary-slips.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.error('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>

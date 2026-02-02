@@ -2561,3 +2561,398 @@ function showTemplateFeedback(templateName) {
         setTimeout(() => toast.remove(), 300);
     }, 2000);
 }
+
+// =============== Share Feature Functions ===============
+
+/**
+ * Generate a shareable URL with current calculation data
+ */
+function generateShareUrl() {
+    const data = {
+        // Income data
+        salary: parseNumber(document.getElementById('salary')?.value) || 0,
+        bonus: parseNumber(document.getElementById('bonus')?.value) || 0,
+        otherIncome: parseNumber(document.getElementById('otherIncome')?.value) || 0,
+
+        // Basic deductions
+        spouse: document.getElementById('spouseDeduction')?.checked ? 1 : 0,
+
+        // Child deductions
+        childCount: parseInt(document.getElementById('childCount')?.value) || 0,
+        childCount2561: parseInt(document.getElementById('childCount2561')?.value) || 0,
+
+        // Parent deductions
+        parentCount: document.getElementById('parentDeduction')?.checked ?
+            (parseInt(document.getElementById('parentCount')?.value) || 0) : 0,
+        parentSpouseCount: document.getElementById('parentSpouseDeduction')?.checked ?
+            (parseInt(document.getElementById('parentSpouseCount')?.value) || 0) : 0,
+
+        // Social security
+        socialSecurity: parseNumber(document.getElementById('socialSecurity')?.value) || 0,
+
+        // Plan 1 deductions
+        p1_life: parseNumber(document.getElementById('plan1_lifeInsurance')?.value) || 0,
+        p1_health: parseNumber(document.getElementById('plan1_healthInsurance')?.value) || 0,
+        p1_pension: parseNumber(document.getElementById('plan1_pensionInsurance')?.value) || 0,
+        p1_pvd: parseNumber(document.getElementById('plan1_pvd')?.value) || 0,
+        p1_rmf: parseNumber(document.getElementById('plan1_rmf')?.value) || 0,
+        p1_esg: parseNumber(document.getElementById('plan1_thaiEsg')?.value) || 0,
+        p1_esgx: parseNumber(document.getElementById('plan1_thaiEsgx')?.value) || 0,
+        p1_home: parseNumber(document.getElementById('plan1_homeLoan')?.value) || 0,
+
+        // Plan 2 deductions
+        p2_life: parseNumber(document.getElementById('plan2_lifeInsurance')?.value) || 0,
+        p2_health: parseNumber(document.getElementById('plan2_healthInsurance')?.value) || 0,
+        p2_pension: parseNumber(document.getElementById('plan2_pensionInsurance')?.value) || 0,
+        p2_pvd: parseNumber(document.getElementById('plan2_pvd')?.value) || 0,
+        p2_rmf: parseNumber(document.getElementById('plan2_rmf')?.value) || 0,
+        p2_esg: parseNumber(document.getElementById('plan2_thaiEsg')?.value) || 0,
+        p2_esgx: parseNumber(document.getElementById('plan2_thaiEsgx')?.value) || 0,
+        p2_home: parseNumber(document.getElementById('plan2_homeLoan')?.value) || 0
+    };
+
+    // Compress data to base64
+    const jsonStr = JSON.stringify(data);
+    const base64 = btoa(encodeURIComponent(jsonStr));
+
+    // Create URL
+    const url = new URL(window.location.href.split('?')[0]);
+    url.searchParams.set('d', base64);
+
+    return url.toString();
+}
+
+/**
+ * Load data from URL parameters
+ */
+function loadFromShareUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const dataStr = params.get('d');
+
+    if (!dataStr) return false;
+
+    try {
+        const jsonStr = decodeURIComponent(atob(dataStr));
+        const data = JSON.parse(jsonStr);
+
+        // Set income data
+        if (data.salary) document.getElementById('salary').value = data.salary;
+        if (data.bonus) document.getElementById('bonus').value = data.bonus;
+        if (data.otherIncome) document.getElementById('otherIncome').value = data.otherIncome;
+
+        // Set basic deductions
+        if (data.spouse) document.getElementById('spouseDeduction').checked = true;
+
+        // Set child deductions
+        if (data.childCount) {
+            document.getElementById('childDeduction').checked = true;
+            document.getElementById('childCount').value = data.childCount;
+        }
+        if (data.childCount2561) {
+            document.getElementById('childCount2561').value = data.childCount2561;
+        }
+
+        // Set parent deductions
+        if (data.parentCount) {
+            document.getElementById('parentDeduction').checked = true;
+            document.getElementById('parentCount').value = data.parentCount;
+        }
+        if (data.parentSpouseCount) {
+            document.getElementById('parentSpouseDeduction').checked = true;
+            document.getElementById('parentSpouseCount').value = data.parentSpouseCount;
+        }
+
+        // Set social security
+        if (data.socialSecurity) document.getElementById('socialSecurity').value = data.socialSecurity;
+
+        // Set Plan 1 deductions
+        setSharedDeduction('plan1', 'lifeInsurance', data.p1_life);
+        setSharedDeduction('plan1', 'healthInsurance', data.p1_health);
+        setSharedDeduction('plan1', 'pensionInsurance', data.p1_pension);
+        setSharedDeduction('plan1', 'pvd', data.p1_pvd);
+        setSharedDeduction('plan1', 'rmf', data.p1_rmf);
+        setSharedDeduction('plan1', 'thaiEsg', data.p1_esg);
+        setSharedDeduction('plan1', 'thaiEsgx', data.p1_esgx);
+        setSharedDeduction('plan1', 'homeLoan', data.p1_home);
+
+        // Set Plan 2 deductions
+        setSharedDeduction('plan2', 'lifeInsurance', data.p2_life);
+        setSharedDeduction('plan2', 'healthInsurance', data.p2_health);
+        setSharedDeduction('plan2', 'pensionInsurance', data.p2_pension);
+        setSharedDeduction('plan2', 'pvd', data.p2_pvd);
+        setSharedDeduction('plan2', 'rmf', data.p2_rmf);
+        setSharedDeduction('plan2', 'thaiEsg', data.p2_esg);
+        setSharedDeduction('plan2', 'thaiEsgx', data.p2_esgx);
+        setSharedDeduction('plan2', 'homeLoan', data.p2_home);
+
+        // Format number inputs
+        formatAllInputs();
+
+        // Calculate
+        calculateAll();
+
+        showTemplateFeedback('โหลดข้อมูลจาก Link สำเร็จ!');
+
+        return true;
+    } catch (e) {
+        console.error('Error loading shared data:', e);
+        return false;
+    }
+}
+
+/**
+ * Helper to set shared deduction values
+ */
+function setSharedDeduction(plan, item, value) {
+    if (!value || value === 0) return;
+
+    const checkbox = document.getElementById(`${plan}_${item}_check`);
+    const slider = document.getElementById(`${plan}_${item}`);
+    const container = document.getElementById(`${plan}_${item}_container`);
+    const display = document.getElementById(`${plan}_${item}_display`);
+
+    if (checkbox && slider && container && display) {
+        checkbox.checked = true;
+        container.style.display = 'block';
+        slider.value = value;
+        display.textContent = formatNumber(value);
+    }
+}
+
+/**
+ * Open share modal
+ */
+function openShareModal() {
+    const modal = document.getElementById('shareModal');
+    const urlInput = document.getElementById('shareUrl');
+
+    // Generate and set URL
+    const url = generateShareUrl();
+    urlInput.value = url;
+
+    // Show modal
+    modal.classList.add('active');
+
+    // Update social share links
+    const encodedUrl = encodeURIComponent(url);
+    const shareText = encodeURIComponent('ผลคำนวณภาษีเงินได้ปี 2569 ของฉัน');
+
+    document.getElementById('shareLineBtn').href =
+        `https://social-plugins.line.me/lineit/share?url=${encodedUrl}`;
+    document.getElementById('shareFacebookBtn').href =
+        `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+    document.getElementById('shareTwitterBtn').href =
+        `https://twitter.com/intent/tweet?text=${shareText}&url=${encodedUrl}`;
+}
+
+/**
+ * Close share modal
+ */
+function closeShareModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('shareModal').classList.remove('active');
+}
+
+/**
+ * Copy share URL to clipboard
+ */
+async function copyShareUrl() {
+    const urlInput = document.getElementById('shareUrl');
+    const copyBtn = document.getElementById('copyBtn');
+
+    try {
+        await navigator.clipboard.writeText(urlInput.value);
+        copyBtn.textContent = 'คัดลอกแล้ว!';
+        copyBtn.classList.add('copied');
+
+        setTimeout(() => {
+            copyBtn.textContent = 'คัดลอก';
+            copyBtn.classList.remove('copied');
+        }, 2000);
+    } catch (e) {
+        // Fallback for older browsers
+        urlInput.select();
+        document.execCommand('copy');
+        copyBtn.textContent = 'คัดลอกแล้ว!';
+        copyBtn.classList.add('copied');
+
+        setTimeout(() => {
+            copyBtn.textContent = 'คัดลอก';
+            copyBtn.classList.remove('copied');
+        }, 2000);
+    }
+}
+
+/**
+ * Share via Line
+ */
+function shareViaLine() {
+    const url = generateShareUrl();
+    window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}`, '_blank');
+}
+
+/**
+ * Share via Facebook
+ */
+function shareViaFacebook() {
+    const url = generateShareUrl();
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+}
+
+/**
+ * Share via Twitter
+ */
+function shareViaTwitter() {
+    const url = generateShareUrl();
+    const text = 'ผลคำนวณภาษีเงินได้ปี 2569 ของฉัน';
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+}
+
+/**
+ * Share via Web Share API
+ */
+async function shareViaWebShare() {
+    const url = generateShareUrl();
+
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'คำนวณภาษีเงินได้ 2569',
+                text: 'ผลคำนวณภาษีเงินได้ของฉัน',
+                url: url
+            });
+        } catch (e) {
+            if (e.name !== 'AbortError') {
+                console.error('Share failed:', e);
+            }
+        }
+    } else {
+        // Fallback - copy to clipboard
+        copyShareUrl();
+    }
+}
+
+// =============== Compare Modal Functions ===============
+
+/**
+ * Open compare modal with detailed comparison
+ */
+function openCompareModal() {
+    const modal = document.getElementById('compareModal');
+
+    // Get tax amounts
+    const baselineTax = parseNumber(document.getElementById('finalBaselineTax')?.textContent) || 0;
+    const plan1Tax = parseNumber(document.getElementById('finalPlan1Tax')?.textContent) || 0;
+    const plan2Tax = parseNumber(document.getElementById('finalPlan2Tax')?.textContent) || 0;
+
+    // Determine best plan
+    const taxes = [
+        { name: 'baseline', tax: baselineTax, label: 'ไม่ลดหย่อนเพิ่ม' },
+        { name: 'plan1', tax: plan1Tax, label: 'แผน 1' },
+        { name: 'plan2', tax: plan2Tax, label: 'แผน 2' }
+    ];
+
+    const bestPlan = taxes.reduce((min, p) => p.tax < min.tax ? p : min);
+
+    // Generate compare cards
+    const compareGrid = document.getElementById('compareGrid');
+    compareGrid.innerHTML = taxes.map(plan => `
+        <div class="compare-card ${plan.name === bestPlan.name ? 'best' : ''}">
+            <div class="compare-card-title">${plan.label}</div>
+            <div class="compare-card-amount">${formatNumber(plan.tax)} บาท/ปี</div>
+            <div class="compare-card-monthly">${formatNumber(Math.round(plan.tax / 12))} บาท/เดือน</div>
+            ${plan.name !== 'baseline' ? `
+                <div class="compare-card-savings">
+                    ประหยัด ${formatNumber(baselineTax - plan.tax)} บาท
+                </div>
+            ` : ''}
+            ${plan.name === bestPlan.name ? '<div class="compare-best-badge">✓ ดีที่สุด</div>' : ''}
+        </div>
+    `).join('');
+
+    // Generate detailed comparison
+    generateDetailedComparison();
+
+    // Show modal
+    modal.classList.add('active');
+}
+
+/**
+ * Generate detailed comparison table
+ */
+function generateDetailedComparison() {
+    const details = document.getElementById('compareDetails');
+
+    // Get all deduction values
+    const items = [
+        { label: 'ประกันชีวิต', p1: 'plan1_lifeInsurance', p2: 'plan2_lifeInsurance' },
+        { label: 'ประกันสุขภาพ', p1: 'plan1_healthInsurance', p2: 'plan2_healthInsurance' },
+        { label: 'ประกันบำนาญ', p1: 'plan1_pensionInsurance', p2: 'plan2_pensionInsurance' },
+        { label: 'PVD', p1: 'plan1_pvd', p2: 'plan2_pvd' },
+        { label: 'RMF', p1: 'plan1_rmf', p2: 'plan2_rmf' },
+        { label: 'Thai ESG', p1: 'plan1_thaiEsg', p2: 'plan2_thaiEsg' },
+        { label: 'Thai ESGx', p1: 'plan1_thaiEsgx', p2: 'plan2_thaiEsgx' },
+        { label: 'ดอกเบี้ยบ้าน', p1: 'plan1_homeLoan', p2: 'plan2_homeLoan' }
+    ];
+
+    let rows = items.map(item => {
+        const p1Value = parseNumber(document.getElementById(item.p1)?.value) || 0;
+        const p2Value = parseNumber(document.getElementById(item.p2)?.value) || 0;
+        const diff = p2Value - p1Value;
+
+        if (p1Value === 0 && p2Value === 0) return '';
+
+        return `
+            <tr>
+                <td>${item.label}</td>
+                <td>${formatNumber(p1Value)} บาท</td>
+                <td>${formatNumber(p2Value)} บาท</td>
+                <td>
+                    ${diff !== 0 ? `
+                        <span class="compare-diff ${diff < 0 ? 'negative' : ''}">
+                            ${diff > 0 ? '+' : ''}${formatNumber(diff)}
+                        </span>
+                    ` : '-'}
+                </td>
+            </tr>
+        `;
+    }).filter(row => row !== '').join('');
+
+    if (!rows) {
+        rows = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">ยังไม่มีข้อมูลค่าลดหย่อน</td></tr>';
+    }
+
+    details.innerHTML = `
+        <div class="compare-details-title">รายละเอียดค่าลดหย่อน</div>
+        <table class="compare-table">
+            <thead>
+                <tr>
+                    <th>รายการ</th>
+                    <th>แผน 1</th>
+                    <th>แผน 2</th>
+                    <th>ผลต่าง</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+    `;
+}
+
+/**
+ * Close compare modal
+ */
+function closeCompareModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('compareModal').classList.remove('active');
+}
+
+// =============== Initialize Share Feature ===============
+// Load shared data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Check for shared URL data
+    setTimeout(() => {
+        loadFromShareUrl();
+    }, 500);
+});
