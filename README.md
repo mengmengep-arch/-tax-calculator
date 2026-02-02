@@ -313,6 +313,13 @@ python -m http.server 8000
 # เปิด http://localhost:8000
 ```
 
+## 👨‍💻 Contributors
+
+| | ชื่อ | บทบาท | ติดต่อ |
+|---|------|-------|--------|
+| 👤 | **เอกลักษณ์ หิรัญสิริสวัสดิ์**<br>Ekaluk Hirunsirisawad | Project Owner & Developer | 📧 ekalukofficial@gmail.com |
+| 🤖 | **Claude** | AI Pair Programmer | [Anthropic](https://anthropic.com) |
+
 ## 📝 License
 
 โปรเจคนี้เปิดให้ใช้งานฟรี สามารถนำไปปรับปรุงและใช้งานได้ตามต้องการ
