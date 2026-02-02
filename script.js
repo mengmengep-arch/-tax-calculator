@@ -35,6 +35,9 @@ function parseNumberWithComma(value) {
     return parseFloat(value) || 0;
 }
 
+// Alias สำหรับ parseNumberWithComma
+const parseNumber = parseNumberWithComma;
+
 function calculateTax(netIncome, totalDeduction) {
     const taxableIncome = Math.max(netIncome - totalDeduction, 0);
     let totalTax = 0;
@@ -2975,9 +2978,9 @@ function openCompareModal() {
     const modal = document.getElementById('compareModal');
 
     // Get tax amounts
-    const baselineTax = parseNumber(document.getElementById('finalBaselineTax')?.textContent) || 0;
-    const plan1Tax = parseNumber(document.getElementById('finalPlan1Tax')?.textContent) || 0;
-    const plan2Tax = parseNumber(document.getElementById('finalPlan2Tax')?.textContent) || 0;
+    const baselineTax = parseNumberWithComma(document.getElementById('finalBaselineTax')?.textContent) || 0;
+    const plan1Tax = parseNumberWithComma(document.getElementById('finalPlan1Tax')?.textContent) || 0;
+    const plan2Tax = parseNumberWithComma(document.getElementById('finalPlan2Tax')?.textContent) || 0;
 
     // Determine best plan
     const taxes = [
