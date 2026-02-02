@@ -4,6 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คำนวณภาษีเงินได้บุคคลธรรมดา - พนักงานประจำ</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="เครื่องมือคำนวณภาษีเงินได้บุคคลธรรมดาสำหรับพนักงานประจำในประเทศไทย ปีภาษี 2569">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="คำนวณภาษี">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Favicon & App Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-72x72.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-192x192.png">
+
+    <!-- Splash Screen for iOS -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -788,5 +811,92 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="export-pdf.js"></script>
     <script src="script.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker registered successfully:', registration.scope);
+
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New version available
+                                    showUpdateNotification();
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // Show update notification when new version is available
+        function showUpdateNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'pwa-update-notification';
+            notification.innerHTML = `
+                <div class="pwa-update-content">
+                    <span>🔄 มีเวอร์ชันใหม่พร้อมใช้งาน</span>
+                    <button onclick="location.reload()">อัพเดท</button>
+                    <button onclick="this.parentElement.parentElement.remove()">ภายหลัง</button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallButton();
+        });
+
+        function showInstallButton() {
+            // Check if install button already exists
+            if (document.getElementById('pwaInstallBtn')) return;
+
+            const installBtn = document.createElement('button');
+            installBtn.id = 'pwaInstallBtn';
+            installBtn.className = 'pwa-install-btn';
+            installBtn.innerHTML = '📲 ติดตั้งแอป';
+            installBtn.onclick = installPWA;
+
+            // Add to header buttons
+            const headerButtons = document.querySelector('.header-buttons');
+            if (headerButtons) {
+                headerButtons.insertBefore(installBtn, headerButtons.firstChild);
+            }
+        }
+
+        async function installPWA() {
+            if (!deferredPrompt) return;
+
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+
+            if (outcome === 'accepted') {
+                console.log('✅ PWA installed');
+                const installBtn = document.getElementById('pwaInstallBtn');
+                if (installBtn) installBtn.remove();
+            }
+
+            deferredPrompt = null;
+        }
+
+        // Track PWA installation
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ PWA was installed');
+            deferredPrompt = null;
+        });
+    </script>
 </body>
 </html>
