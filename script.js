@@ -410,8 +410,13 @@ function saveBasicDeductions() {
         total += 60000;
     }
 
+    // บุตรคนแรก / เกิดก่อนปี 2561 (30,000 บาท/คน)
     const childCount = parseInt(document.getElementById('childCount').value) || 0;
     total += childCount * 30000;
+
+    // บุตรคนที่ 2+ เกิดปี 2561 เป็นต้นไป (60,000 บาท/คน)
+    const childCount2561 = parseInt(document.getElementById('childCount2561')?.value) || 0;
+    total += childCount2561 * 60000;
 
     if (document.getElementById('parentDeduction').checked) {
         const parentCount = parseInt(document.getElementById('parentCount').value);
@@ -423,6 +428,12 @@ function saveBasicDeductions() {
         total += parentSpouseCount * 30000;
     }
 
+    // ประกันสุขภาพบิดามารดา (สูงสุด 15,000 บาท)
+    if (document.getElementById('parentHealthInsurance')?.checked) {
+        const parentHealthAmount = Math.min(parseNumberWithComma(document.getElementById('parentHealthInsuranceAmount')?.value || 0), 15000);
+        total += parentHealthAmount;
+    }
+
     const socialSecurity = Math.min(parseNumberWithComma(document.getElementById('socialSecurity').value) * 12, 10000);
     total += socialSecurity;
 
@@ -432,10 +443,13 @@ function saveBasicDeductions() {
     const formData = {
         spouseDeduction: document.getElementById('spouseDeduction').checked,
         childCount,
+        childCount2561,
         parentDeduction: document.getElementById('parentDeduction').checked,
         parentCount: document.getElementById('parentCount').value,
         parentSpouseDeduction: document.getElementById('parentSpouseDeduction').checked,
         parentSpouseCount: document.getElementById('parentSpouseCount').value,
+        parentHealthInsurance: document.getElementById('parentHealthInsurance')?.checked || false,
+        parentHealthInsuranceAmount: document.getElementById('parentHealthInsuranceAmount')?.value || 0,
         socialSecurity: document.getElementById('socialSecurity').value
     };
     localStorage.setItem('taxCalc_basicDeductions', JSON.stringify(formData));
@@ -448,8 +462,13 @@ function updateBasicDeductionPreview() {
         total += 60000;
     }
 
+    // บุตรคนแรก / เกิดก่อนปี 2561 (30,000 บาท/คน)
     const childCount = parseInt(document.getElementById('childCount').value) || 0;
     total += childCount * 30000;
+
+    // บุตรคนที่ 2+ เกิดปี 2561 เป็นต้นไป (60,000 บาท/คน)
+    const childCount2561 = parseInt(document.getElementById('childCount2561')?.value) || 0;
+    total += childCount2561 * 60000;
 
     if (document.getElementById('parentDeduction').checked) {
         const parentCount = parseInt(document.getElementById('parentCount').value);
@@ -461,10 +480,24 @@ function updateBasicDeductionPreview() {
         total += parentSpouseCount * 30000;
     }
 
+    // ประกันสุขภาพบิดามารดา (สูงสุด 15,000 บาท)
+    if (document.getElementById('parentHealthInsurance')?.checked) {
+        const parentHealthAmount = Math.min(parseNumberWithComma(document.getElementById('parentHealthInsuranceAmount')?.value || 0), 15000);
+        total += parentHealthAmount;
+    }
+
     const socialSecurity = Math.min(parseNumberWithComma(document.getElementById('socialSecurity').value || 0) * 12, 10000);
     total += socialSecurity;
 
     document.getElementById('basicDeductionPreview').textContent = formatNumber(total);
+}
+
+// ฟังก์ชันคำนวณและแสดงผลลดหย่อนบุตรรวม
+function updateChildDeductionDisplay() {
+    const childCount = parseInt(document.getElementById('childCount')?.value) || 0;
+    const childCount2561 = parseInt(document.getElementById('childCount2561')?.value) || 0;
+    const totalChildDeduction = (childCount * 30000) + (childCount2561 * 60000);
+    document.getElementById('childDeductionDisplay').textContent = formatNumber(totalChildDeduction);
 }
 
 function updateAndSaveBasicDeductions() {
@@ -1539,12 +1572,23 @@ function initializeApp() {
 
     // Step 2: Basic deduction sliders
     console.log('👨‍👩‍👧‍👦 Setting up Step 2 sliders...');
+
+    // บุตรคนแรก / เกิดก่อนปี 2561
     setupSlider('childCount', 'childSlider', 'childDisplay', function() {
-        const count = document.getElementById('childSlider').value;
-        document.getElementById('childDeductionDisplay').textContent = formatNumber(count * 30000);
+        updateChildDeductionDisplay();
         updateAndSaveBasicDeductions();
     });
+
+    // บุตรคนที่ 2+ เกิดปี 2561 เป็นต้นไป
+    setupSlider('childCount2561', 'childSlider2561', 'childDisplay2561', function() {
+        updateChildDeductionDisplay();
+        updateAndSaveBasicDeductions();
+    });
+
     setupSlider('socialSecurity', 'socialSecuritySlider', 'socialSecurityDisplay', updateAndSaveBasicDeductions);
+
+    // ประกันสุขภาพบิดามารดา slider
+    setupSlider('parentHealthInsuranceAmount', 'parentHealthInsuranceSlider', 'parentHealthInsuranceDisplay', updateAndSaveBasicDeductions);
 
     // Parent options toggle
     document.getElementById('parentDeduction').addEventListener('change', function() {
@@ -1554,6 +1598,12 @@ function initializeApp() {
 
     document.getElementById('parentSpouseDeduction').addEventListener('change', function() {
         document.getElementById('parentSpouseOptions').style.display = this.checked ? 'block' : 'none';
+        updateAndSaveBasicDeductions();
+    });
+
+    // ประกันสุขภาพบิดามารดา checkbox toggle
+    document.getElementById('parentHealthInsurance').addEventListener('change', function() {
+        document.getElementById('parentHealthInsuranceOptions').style.display = this.checked ? 'block' : 'none';
         updateAndSaveBasicDeductions();
     });
 
@@ -2166,12 +2216,30 @@ function loadSavedData() {
     if (savedBasic) {
         const data = JSON.parse(savedBasic);
         if (data.spouseDeduction) document.getElementById('spouseDeduction').checked = data.spouseDeduction;
+
+        // บุตรคนแรก / เกิดก่อนปี 2561
         if (data.childCount) {
             document.getElementById('childSlider').value = data.childCount;
             document.getElementById('childCount').value = data.childCount;
             document.getElementById('childDisplay').textContent = data.childCount;
-            document.getElementById('childDeductionDisplay').textContent = formatNumber(data.childCount * 30000);
         }
+
+        // บุตรคนที่ 2+ เกิดปี 2561 เป็นต้นไป
+        if (data.childCount2561) {
+            const slider2561 = document.getElementById('childSlider2561');
+            const input2561 = document.getElementById('childCount2561');
+            const display2561 = document.getElementById('childDisplay2561');
+            if (slider2561 && input2561 && display2561) {
+                slider2561.value = data.childCount2561;
+                input2561.value = data.childCount2561;
+                display2561.textContent = data.childCount2561;
+            }
+        }
+
+        // อัพเดตค่าลดหย่อนบุตรรวม
+        const childTotal = ((data.childCount || 0) * 30000) + ((data.childCount2561 || 0) * 60000);
+        document.getElementById('childDeductionDisplay').textContent = formatNumber(childTotal);
+
         if (data.parentDeduction) {
             document.getElementById('parentDeduction').checked = data.parentDeduction;
             document.getElementById('parentOptions').style.display = 'block';
@@ -2182,6 +2250,24 @@ function loadSavedData() {
             document.getElementById('parentSpouseOptions').style.display = 'block';
             document.getElementById('parentSpouseCount').value = data.parentSpouseCount;
         }
+
+        // ประกันสุขภาพบิดามารดา
+        if (data.parentHealthInsurance) {
+            const checkbox = document.getElementById('parentHealthInsurance');
+            const options = document.getElementById('parentHealthInsuranceOptions');
+            const slider = document.getElementById('parentHealthInsuranceSlider');
+            const input = document.getElementById('parentHealthInsuranceAmount');
+            const display = document.getElementById('parentHealthInsuranceDisplay');
+            if (checkbox && options && slider && input && display) {
+                checkbox.checked = data.parentHealthInsurance;
+                options.style.display = 'block';
+                const amount = parseNumberWithComma(data.parentHealthInsuranceAmount || 0);
+                slider.value = amount;
+                input.value = formatNumber(amount);
+                display.textContent = formatNumber(amount);
+            }
+        }
+
         if (data.socialSecurity) {
             const value = parseNumberWithComma(data.socialSecurity);
             document.getElementById('socialSecuritySlider').value = value;
@@ -2193,8 +2279,12 @@ function loadSavedData() {
         let total = 60000; // ส่วนตัว
         if (data.spouseDeduction) total += 60000;
         total += (data.childCount || 0) * 30000;
+        total += (data.childCount2561 || 0) * 60000;
         if (data.parentDeduction) total += parseInt(data.parentCount || 1) * 30000;
         if (data.parentSpouseDeduction) total += parseInt(data.parentSpouseCount || 1) * 30000;
+        if (data.parentHealthInsurance) {
+            total += Math.min(parseNumberWithComma(data.parentHealthInsuranceAmount || 0), 15000);
+        }
         if (data.socialSecurity) {
             const socialSecurity = Math.min(parseNumberWithComma(data.socialSecurity) * 12, 10000);
             total += socialSecurity;
@@ -2362,10 +2452,13 @@ const TEMPLATES = {
         bonus: 25000,
         spouseDeduction: false,
         childCount: 0,
+        childCount2561: 0,
         parentDeduction: false,
         parentCount: 0,
         parentSpouseDeduction: false,
         parentSpouseCount: 0,
+        parentHealthInsurance: false,
+        parentHealthInsuranceAmount: 0,
         socialSecurity: 9000
     },
     single: {
@@ -2374,10 +2467,13 @@ const TEMPLATES = {
         bonus: 90000,
         spouseDeduction: false,
         childCount: 0,
+        childCount2561: 0,
         parentDeduction: true,
         parentCount: 2,
         parentSpouseDeduction: false,
         parentSpouseCount: 0,
+        parentHealthInsurance: false,
+        parentHealthInsuranceAmount: 0,
         socialSecurity: 9000
     },
     family: {
@@ -2385,11 +2481,14 @@ const TEMPLATES = {
         salary: 60000,
         bonus: 120000,
         spouseDeduction: true,
-        childCount: 2,
+        childCount: 1,
+        childCount2561: 1,
         parentDeduction: true,
         parentCount: 2,
         parentSpouseDeduction: true,
         parentSpouseCount: 2,
+        parentHealthInsurance: true,
+        parentHealthInsuranceAmount: 15000,
         socialSecurity: 9000
     },
     senior: {
@@ -2397,11 +2496,14 @@ const TEMPLATES = {
         salary: 120000,
         bonus: 360000,
         spouseDeduction: true,
-        childCount: 2,
+        childCount: 1,
+        childCount2561: 1,
         parentDeduction: true,
         parentCount: 2,
         parentSpouseDeduction: true,
         parentSpouseCount: 2,
+        parentHealthInsurance: true,
+        parentHealthInsuranceAmount: 15000,
         socialSecurity: 9000
     },
     freelance: {
@@ -2410,10 +2512,13 @@ const TEMPLATES = {
         bonus: 50000,
         spouseDeduction: false,
         childCount: 0,
+        childCount2561: 0,
         parentDeduction: false,
         parentCount: 0,
         parentSpouseDeduction: false,
         parentSpouseCount: 0,
+        parentHealthInsurance: false,
+        parentHealthInsuranceAmount: 0,
         socialSecurity: 5400
     },
     custom: {
@@ -2422,10 +2527,13 @@ const TEMPLATES = {
         bonus: 0,
         spouseDeduction: false,
         childCount: 0,
+        childCount2561: 0,
         parentDeduction: false,
         parentCount: 0,
         parentSpouseDeduction: false,
         parentSpouseCount: 0,
+        parentHealthInsurance: false,
+        parentHealthInsuranceAmount: 0,
         socialSecurity: 9000
     }
 };
@@ -2466,14 +2574,27 @@ function applyTemplate(templateId) {
         spouseCheckbox.checked = template.spouseDeduction;
     }
 
+    // บุตรคนแรก / เกิดก่อนปี 2561
     const childSlider = document.getElementById('childSlider');
     const childCountInput = document.getElementById('childCount');
     if (childSlider && childCountInput) {
         childSlider.value = template.childCount;
         childCountInput.value = template.childCount;
         document.getElementById('childDisplay').textContent = template.childCount;
-        document.getElementById('childDeductionDisplay').textContent = formatNumber(template.childCount * 30000);
     }
+
+    // บุตรคนที่ 2+ เกิดปี 2561 เป็นต้นไป
+    const childSlider2561 = document.getElementById('childSlider2561');
+    const childCountInput2561 = document.getElementById('childCount2561');
+    if (childSlider2561 && childCountInput2561) {
+        childSlider2561.value = template.childCount2561 || 0;
+        childCountInput2561.value = template.childCount2561 || 0;
+        document.getElementById('childDisplay2561').textContent = template.childCount2561 || 0;
+    }
+
+    // อัพเดตค่าลดหย่อนบุตรรวม
+    const childTotal = ((template.childCount || 0) * 30000) + ((template.childCount2561 || 0) * 60000);
+    document.getElementById('childDeductionDisplay').textContent = formatNumber(childTotal);
 
     const parentCheckbox = document.getElementById('parentDeduction');
     const parentOptions = document.getElementById('parentOptions');
@@ -2491,6 +2612,19 @@ function applyTemplate(templateId) {
         parentSpouseCheckbox.checked = template.parentSpouseDeduction;
         parentSpouseOptions.style.display = template.parentSpouseDeduction ? 'block' : 'none';
         parentSpouseCount.value = template.parentSpouseCount;
+    }
+
+    // ประกันสุขภาพบิดามารดา
+    const parentHealthCheckbox = document.getElementById('parentHealthInsurance');
+    const parentHealthOptions = document.getElementById('parentHealthInsuranceOptions');
+    const parentHealthSlider = document.getElementById('parentHealthInsuranceSlider');
+    const parentHealthInput = document.getElementById('parentHealthInsuranceAmount');
+    if (parentHealthCheckbox && parentHealthOptions && parentHealthSlider && parentHealthInput) {
+        parentHealthCheckbox.checked = template.parentHealthInsurance || false;
+        parentHealthOptions.style.display = template.parentHealthInsurance ? 'block' : 'none';
+        parentHealthSlider.value = template.parentHealthInsuranceAmount || 0;
+        parentHealthInput.value = formatNumber(template.parentHealthInsuranceAmount || 0);
+        document.getElementById('parentHealthInsuranceDisplay').textContent = formatNumber(template.parentHealthInsuranceAmount || 0);
     }
 
     const socialSecurityInput = document.getElementById('socialSecurity');
