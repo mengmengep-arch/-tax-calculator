@@ -1,4 +1,4 @@
-// อัตราภาษีเงินได้บุคคลธรรมดาตามกฎหมายไทย (ปี 2568)
+// อัตราภาษีเงินได้บุคคลธรรมดาตามกฎหมายไทย (ปี 2569)
 // แบบขั้นบันได: [เริ่มต้น, สิ้นสุด, อัตรา%]
 const TAX_BRACKETS = [
     { min: 0, max: 150000, rate: 0 },
@@ -221,6 +221,12 @@ function jumpToStep(step) {
     if (currentStep === 4) {
         calculateFinalResults();
     }
+
+    // Update bottom nav active state (mobile)
+    updateBottomNav(step);
+
+    // Update floating summary
+    updateFloatingSummary();
 
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2202,4 +2208,356 @@ function loadSavedData() {
 
     updateIncomePreview();
     updateBasicDeductionPreview();
+}
+
+// =============== Dark Mode Toggle ===============
+
+function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('taxCalc_theme', newTheme);
+
+    updateThemeUI(newTheme);
+
+    // อัพเดท Chart.js colors ถ้ามี chart
+    if (chartInstance) {
+        updateChartColors(newTheme);
+    }
+}
+
+function updateThemeUI(theme) {
+    const icon = document.getElementById('themeIcon');
+    const label = document.getElementById('themeLabel');
+
+    if (icon && label) {
+        if (theme === 'dark') {
+            icon.textContent = '☀️';
+            label.textContent = 'Light';
+        } else {
+            icon.textContent = '🌙';
+            label.textContent = 'Dark';
+        }
+    }
+}
+
+function updateChartColors(theme) {
+    if (!chartInstance) return;
+
+    const textColor = theme === 'dark' ? '#e4e4e7' : '#333';
+    const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
+    chartInstance.options.scales.x.ticks.color = textColor;
+    chartInstance.options.scales.y.ticks.color = textColor;
+    chartInstance.options.scales.x.grid.color = gridColor;
+    chartInstance.options.scales.y.grid.color = gridColor;
+    chartInstance.options.plugins.legend.labels.color = textColor;
+
+    chartInstance.update();
+}
+
+function initTheme() {
+    const savedTheme = localStorage.getItem('taxCalc_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeUI(savedTheme);
+}
+
+// เรียกใช้ initTheme ตอนโหลดหน้า
+document.addEventListener('DOMContentLoaded', function() {
+    initTheme();
+    initMobileUX();
+});
+
+// =============== Mobile UX Functions ===============
+
+function initMobileUX() {
+    // Initialize bottom nav
+    updateBottomNav(currentStep);
+
+    // Initialize floating summary
+    updateFloatingSummary();
+
+    // Initialize swipe gestures
+    initSwipeGestures();
+}
+
+function updateBottomNav(step) {
+    const navItems = document.querySelectorAll('.bottom-nav-item');
+    navItems.forEach(item => {
+        const itemStep = parseInt(item.getAttribute('data-step'));
+        if (itemStep === step) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+function updateFloatingSummary() {
+    const floatingAmount = document.getElementById('floatingTaxAmount');
+    if (!floatingAmount) return;
+
+    // คำนวณภาษีประมาณการจากข้อมูลปัจจุบัน
+    const totalIncome = incomeData.totalIncome || 0;
+    const expenses = Math.min(totalIncome * 0.5, 100000);
+    const netIncome = totalIncome - expenses;
+    const basicDeduction = basicDeductions.total || 60000;
+    const tax = calculateTax(netIncome, basicDeduction);
+
+    floatingAmount.textContent = formatNumber(tax) + ' บาท';
+}
+
+function toggleFloatingSummary() {
+    const summary = document.getElementById('floatingSummary');
+    if (summary) {
+        summary.classList.toggle('hidden');
+    }
+}
+
+function initSwipeGestures() {
+    const wizardContainer = document.querySelector('.wizard-container');
+    if (!wizardContainer) return;
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const minSwipeDistance = 50;
+
+    wizardContainer.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    wizardContainer.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+        const swipeDistance = touchEndX - touchStartX;
+
+        if (Math.abs(swipeDistance) < minSwipeDistance) return;
+
+        if (swipeDistance > 0 && currentStep > 1) {
+            // Swipe right - go to previous step
+            jumpToStep(currentStep - 1);
+        } else if (swipeDistance < 0 && currentStep < 4) {
+            // Swipe left - go to next step
+            jumpToStep(currentStep + 1);
+        }
+    }
+}
+
+// Update floating summary when income changes
+function onIncomeChange() {
+    updateFloatingSummary();
+}
+
+// =============== Quick Templates ===============
+
+const TEMPLATES = {
+    junior: {
+        name: 'เริ่มต้นทำงาน',
+        salary: 25000,
+        bonus: 25000,
+        spouseDeduction: false,
+        childCount: 0,
+        parentDeduction: false,
+        parentCount: 0,
+        parentSpouseDeduction: false,
+        parentSpouseCount: 0,
+        socialSecurity: 9000
+    },
+    single: {
+        name: 'พนักงานโสด',
+        salary: 45000,
+        bonus: 90000,
+        spouseDeduction: false,
+        childCount: 0,
+        parentDeduction: true,
+        parentCount: 2,
+        parentSpouseDeduction: false,
+        parentSpouseCount: 0,
+        socialSecurity: 9000
+    },
+    family: {
+        name: 'มีครอบครัว',
+        salary: 60000,
+        bonus: 120000,
+        spouseDeduction: true,
+        childCount: 2,
+        parentDeduction: true,
+        parentCount: 2,
+        parentSpouseDeduction: true,
+        parentSpouseCount: 2,
+        socialSecurity: 9000
+    },
+    senior: {
+        name: 'ผู้บริหาร',
+        salary: 120000,
+        bonus: 360000,
+        spouseDeduction: true,
+        childCount: 2,
+        parentDeduction: true,
+        parentCount: 2,
+        parentSpouseDeduction: true,
+        parentSpouseCount: 2,
+        socialSecurity: 9000
+    },
+    freelance: {
+        name: 'ฟรีแลนซ์',
+        salary: 35000,
+        bonus: 50000,
+        spouseDeduction: false,
+        childCount: 0,
+        parentDeduction: false,
+        parentCount: 0,
+        parentSpouseDeduction: false,
+        parentSpouseCount: 0,
+        socialSecurity: 5400
+    },
+    custom: {
+        name: 'กำหนดเอง',
+        salary: 30000,
+        bonus: 0,
+        spouseDeduction: false,
+        childCount: 0,
+        parentDeduction: false,
+        parentCount: 0,
+        parentSpouseDeduction: false,
+        parentSpouseCount: 0,
+        socialSecurity: 9000
+    }
+};
+
+function applyTemplate(templateId) {
+    const template = TEMPLATES[templateId];
+    if (!template) return;
+
+    console.log(`📋 Applying template: ${template.name}`);
+
+    // Update template card selection
+    document.querySelectorAll('.template-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+
+    // Apply Step 1 - Income
+    const salaryInput = document.getElementById('salary');
+    const salarySlider = document.getElementById('salarySlider');
+    const bonusInput = document.getElementById('bonus');
+    const bonusSlider = document.getElementById('bonusSlider');
+
+    if (salaryInput && salarySlider) {
+        salaryInput.value = formatNumber(template.salary);
+        salarySlider.value = template.salary;
+        document.getElementById('salaryDisplay').textContent = formatNumber(template.salary);
+    }
+
+    if (bonusInput && bonusSlider) {
+        bonusInput.value = formatNumber(template.bonus);
+        bonusSlider.value = template.bonus;
+        document.getElementById('bonusDisplay').textContent = formatNumber(template.bonus);
+    }
+
+    // Apply Step 2 - Basic Deductions
+    const spouseCheckbox = document.getElementById('spouseDeduction');
+    if (spouseCheckbox) {
+        spouseCheckbox.checked = template.spouseDeduction;
+    }
+
+    const childSlider = document.getElementById('childSlider');
+    const childCountInput = document.getElementById('childCount');
+    if (childSlider && childCountInput) {
+        childSlider.value = template.childCount;
+        childCountInput.value = template.childCount;
+        document.getElementById('childDisplay').textContent = template.childCount;
+        document.getElementById('childDeductionDisplay').textContent = formatNumber(template.childCount * 30000);
+    }
+
+    const parentCheckbox = document.getElementById('parentDeduction');
+    const parentOptions = document.getElementById('parentOptions');
+    const parentCount = document.getElementById('parentCount');
+    if (parentCheckbox && parentOptions && parentCount) {
+        parentCheckbox.checked = template.parentDeduction;
+        parentOptions.style.display = template.parentDeduction ? 'block' : 'none';
+        parentCount.value = template.parentCount;
+    }
+
+    const parentSpouseCheckbox = document.getElementById('parentSpouseDeduction');
+    const parentSpouseOptions = document.getElementById('parentSpouseOptions');
+    const parentSpouseCount = document.getElementById('parentSpouseCount');
+    if (parentSpouseCheckbox && parentSpouseOptions && parentSpouseCount) {
+        parentSpouseCheckbox.checked = template.parentSpouseDeduction;
+        parentSpouseOptions.style.display = template.parentSpouseDeduction ? 'block' : 'none';
+        parentSpouseCount.value = template.parentSpouseCount;
+    }
+
+    const socialSecurityInput = document.getElementById('socialSecurity');
+    const socialSecuritySlider = document.getElementById('socialSecuritySlider');
+    if (socialSecurityInput && socialSecuritySlider) {
+        socialSecurityInput.value = formatNumber(template.socialSecurity);
+        socialSecuritySlider.value = template.socialSecurity;
+        document.getElementById('socialSecurityDisplay').textContent = formatNumber(template.socialSecurity);
+    }
+
+    // Update previews
+    updateIncomePreview();
+    updateBasicDeductionPreview();
+    updateFloatingSummary();
+
+    // Save data
+    saveIncomeData();
+    saveBasicDeductions();
+
+    // Show success feedback
+    showTemplateFeedback(template.name);
+}
+
+function showTemplateFeedback(templateName) {
+    // Create toast notification
+    const toast = document.createElement('div');
+    toast.className = 'template-toast';
+    toast.innerHTML = `✅ ใช้รูปแบบ "${templateName}" เรียบร้อย`;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: ${window.innerWidth <= 768 ? '100px' : '30px'};
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        z-index: 10000;
+        animation: toastIn 0.3s ease-out;
+    `;
+
+    // Add animation keyframes if not exists
+    if (!document.querySelector('#toast-styles')) {
+        const style = document.createElement('style');
+        style.id = 'toast-styles';
+        style.textContent = `
+            @keyframes toastIn {
+                from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+                to { opacity: 1; transform: translateX(-50%) translateY(0); }
+            }
+            @keyframes toastOut {
+                from { opacity: 1; transform: translateX(-50%) translateY(0); }
+                to { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(toast);
+
+    // Remove toast after 2 seconds
+    setTimeout(() => {
+        toast.style.animation = 'toastOut 0.3s ease-in forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
 }
