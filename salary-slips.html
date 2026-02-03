@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จัดการสลิปเงินเดือน - ปี 2569</title>
+    <title>SlipManager - จัดการสลิปเงินเดือน | TaxFlex</title>
 
     <!-- PWA Meta Tags -->
     <meta name="description" content="จัดการสลิปเงินเดือนและคำนวณรายได้รวมทั้งปี">
@@ -22,6 +22,26 @@
 
     <link rel="stylesheet" href="styles.css">
     <style>
+        /* Page Title Styles */
+        .page-title {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .page-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        [data-theme="dark"] .page-title {
+            color: #a78bfa;
+        }
+
+        [data-theme="dark"] .page-subtitle {
+            color: #9ca3af;
+        }
+
         .salary-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -386,36 +406,232 @@
             width: 0%;
             transition: width 0.3s ease;
         }
+
+        /* Info Box */
+        .info-box-storage {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box-storage h4 {
+            margin: 0 0 10px 0;
+            color: #1976D2;
+            font-size: 1rem;
+        }
+
+        .info-box-storage p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        /* Months Section Title */
+        .section-title {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* ============================================
+           Dark Mode Support
+           ============================================ */
+        [data-theme="dark"] .month-card {
+            background: #1e1e2e;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .month-card.no-data {
+            border-left-color: #4a4a5a;
+        }
+
+        [data-theme="dark"] .month-header {
+            border-bottom-color: #3f3f5a;
+        }
+
+        [data-theme="dark"] .month-title {
+            color: #a78bfa;
+        }
+
+        [data-theme="dark"] .month-data .label {
+            color: #9ca3af;
+        }
+
+        [data-theme="dark"] .month-data .value {
+            color: #e5e7eb;
+        }
+
+        [data-theme="dark"] .slip-image-thumb {
+            background: #252538;
+            color: #9ca3af;
+        }
+
+        [data-theme="dark"] .slip-image-thumb:hover {
+            background: #2d2d44;
+        }
+
+        [data-theme="dark"] .modal-content {
+            background-color: #1e1e2e;
+            color: #e5e7eb;
+        }
+
+        [data-theme="dark"] .close-modal {
+            color: #9ca3af;
+        }
+
+        [data-theme="dark"] .close-modal:hover {
+            color: #e5e7eb;
+        }
+
+        [data-theme="dark"] .form-group label {
+            color: #e5e7eb;
+        }
+
+        [data-theme="dark"] .form-group input[type="number"],
+        [data-theme="dark"] .form-group textarea {
+            background: #252538;
+            border-color: #3f3f5a;
+            color: #e5e7eb;
+        }
+
+        [data-theme="dark"] .form-group input:focus,
+        [data-theme="dark"] .form-group textarea:focus {
+            border-color: #a78bfa;
+        }
+
+        [data-theme="dark"] .upload-area {
+            background: #252538;
+            border-color: #4a4a5a;
+            color: #9ca3af;
+        }
+
+        [data-theme="dark"] .upload-area:hover {
+            border-color: #a78bfa;
+            background: #2d2d44;
+        }
+
+        [data-theme="dark"] .info-box-storage {
+            background: rgba(33, 150, 243, 0.15);
+        }
+
+        [data-theme="dark"] .info-box-storage h4 {
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] .info-box-storage p {
+            color: #9ca3af;
+        }
+
+        [data-theme="dark"] .section-title {
+            color: #e5e7eb;
+        }
+
+        /* Income/Deduct Sections in Modal */
+        .income-section {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .income-section h3 {
+            margin: 0 0 15px 0;
+            color: #0369a1;
+            font-size: 1rem;
+        }
+
+        .deduct-section {
+            background: #fff1f2;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .deduct-section h3 {
+            margin: 0 0 15px 0;
+            color: #be123c;
+            font-size: 1rem;
+        }
+
+        [data-theme="dark"] .income-section {
+            background: rgba(3, 105, 161, 0.15);
+        }
+
+        [data-theme="dark"] .income-section h3 {
+            color: #38bdf8;
+        }
+
+        [data-theme="dark"] .deduct-section {
+            background: rgba(190, 18, 60, 0.15);
+        }
+
+        [data-theme="dark"] .deduct-section h3 {
+            color: #fb7185;
+        }
+
+        /* Settings Modal */
+        [data-theme="dark"] #settingsModal .modal-content h2 {
+            color: #a78bfa;
+        }
+
+        [data-theme="dark"] #settingsModal label {
+            color: #e5e7eb;
+        }
+
+        [data-theme="dark"] #settingsModal label span {
+            color: #9ca3af;
+        }
+
+        /* Theme toggle button for this page */
+        .theme-toggle-slip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .theme-toggle-slip:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
     <div class="salary-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
             <button class="back-button" onclick="window.location.href='index.html'">
                 ← กลับไปหน้าคำนวณภาษี
             </button>
-            <button class="back-button" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" onclick="openSettings()">
-                ⚙️ ตั้งค่า OCR
-            </button>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="theme-toggle-slip" onclick="toggleThemeSlip()" title="เปลี่ยนธีม">
+                    <span id="themeIconSlip">🌙</span>
+                    <span id="themeLabelSlip">Dark</span>
+                </div>
+                <button class="back-button" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0;" onclick="openSettings()">
+                    ⚙️ ตั้งค่า OCR
+                </button>
+            </div>
         </div>
 
         <header style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #667eea; margin-bottom: 10px;">📄 จัดการสลิปเงินเดือน</h1>
-            <p style="color: #666; font-size: 1.1rem;">ปีภาษี 2568</p>
+            <h1 class="page-title">📄 SlipManager</h1>
+            <p class="page-subtitle">จัดการสลิปเงินเดือน • ปีภาษี 2569</p>
         </header>
 
         <!-- Info Box: Data Storage -->
-        <div style="background: #e3f2fd; border-left: 4px solid #2196F3; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h4 style="margin: 0 0 10px 0; color: #1976D2; font-size: 1rem;">💾 การเก็บข้อมูล</h4>
-            <p style="margin: 5px 0; font-size: 0.9rem; color: #555;">
-                ✅ <strong>ข้อมูลเก็บอัตโนมัติ:</strong> ระบบเก็บข้อมูลสลิปของคุณไว้ในเบราว์เซอร์ (localStorage)
-            </p>
-            <p style="margin: 5px 0; font-size: 0.9rem; color: #555;">
-                ✅ <strong>ใช้งานต่อเนื่อง:</strong> ปิดเว็บแล้วเปิดใหม่ ข้อมูลยังอยู่ครบ สามารถเพิ่มสลิปเดือนถัดไปได้เลย
-            </p>
-            <p style="margin: 5px 0; font-size: 0.9rem; color: #555;">
-                ⚠️ <strong>ข้อควรระวัง:</strong> อย่าลบ Browser Cache/Cookies มิฉะนั้นข้อมูลจะหาย • แนะนำให้ Export PDF สำรองเป็นประจำ
-            </p>
+        <div class="info-box-storage">
+            <h4>💾 การเก็บข้อมูล</h4>
+            <p>✅ <strong>ข้อมูลเก็บอัตโนมัติ:</strong> ระบบเก็บข้อมูลสลิปของคุณไว้ในเบราว์เซอร์ (localStorage)</p>
+            <p>✅ <strong>ใช้งานต่อเนื่อง:</strong> ปิดเว็บแล้วเปิดใหม่ ข้อมูลยังอยู่ครบ สามารถเพิ่มสลิปเดือนถัดไปได้เลย</p>
+            <p>⚠️ <strong>ข้อควรระวัง:</strong> อย่าลบ Browser Cache/Cookies มิฉะนั้นข้อมูลจะหาย • แนะนำให้ Export PDF สำรองเป็นประจำ</p>
         </div>
 
         <!-- Summary Card -->
@@ -452,7 +668,7 @@
         </div>
 
         <!-- Months Grid -->
-        <h2 style="margin-bottom: 20px; color: #333;">📅 รายละเอียดรายเดือน</h2>
+        <h2 class="section-title">📅 รายละเอียดรายเดือน</h2>
         <div class="months-grid" id="monthsGrid">
             <!-- Will be populated by JavaScript -->
         </div>
@@ -513,7 +729,7 @@
     <div id="slipModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
-            <h2 style="margin-bottom: 20px; color: #667eea;" id="modalTitle">เพิ่มข้อมูลเดือน</h2>
+            <h2 class="page-title" style="margin-bottom: 20px; font-size: 1.5rem;" id="modalTitle">เพิ่มข้อมูลเดือน</h2>
 
             <!-- Upload Area -->
             <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
@@ -536,8 +752,8 @@
                 <input type="hidden" id="currentMonth" value="">
 
                 <!-- INCOME SECTION -->
-                <div style="background: #f0f9ff; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                    <h3 style="margin: 0 0 15px 0; color: #0369a1; font-size: 1rem;">💵 INCOME (รายได้)</h3>
+                <div class="income-section">
+                    <h3>💵 INCOME (รายได้)</h3>
 
                     <div class="form-group">
                         <label>💰 Salary (เงินเดือนพื้นฐาน)</label>
@@ -576,8 +792,8 @@
                 </div>
 
                 <!-- DEDUCT SECTION -->
-                <div style="background: #fff1f2; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                    <h3 style="margin: 0 0 15px 0; color: #be123c; font-size: 1rem;">💸 DEDUCT (รายการหัก)</h3>
+                <div class="deduct-section">
+                    <h3>💸 DEDUCT (รายการหัก)</h3>
 
                     <div class="form-group">
                         <label>🏥 Social Security (ประกันสังคม)</label>
@@ -644,6 +860,39 @@
                     });
             });
         }
+    </script>
+
+    <!-- Theme Management -->
+    <script>
+        // Load theme from localStorage (sync with main app)
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeUI(savedTheme);
+        }
+
+        function updateThemeUI(theme) {
+            const icon = document.getElementById('themeIconSlip');
+            const label = document.getElementById('themeLabelSlip');
+            if (theme === 'dark') {
+                icon.textContent = '☀️';
+                label.textContent = 'Light';
+            } else {
+                icon.textContent = '🌙';
+                label.textContent = 'Dark';
+            }
+        }
+
+        function toggleThemeSlip() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeUI(newTheme);
+        }
+
+        // Load theme on page load
+        loadTheme();
     </script>
 </body>
 </html>

@@ -3226,7 +3226,7 @@ function submitFeedback() {
     );
 
     // เปิด email client
-    const mailtoLink = `mailto:contact@taxflex.app?subject=${subject}&body=${body}`;
+    const mailtoLink = `mailto:ekalukofficial@gmail.com?subject=${subject}&body=${body}`;
     window.open(mailtoLink, '_blank');
 
     // แสดง success message

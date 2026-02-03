@@ -1531,6 +1531,35 @@ footer {
     font-size: 0.85rem;
 }
 
+/* Dark mode - improve text readability */
+[data-theme="dark"] .item-sublabel {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .item-label {
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .slider-value {
+    color: #a78bfa;
+}
+
+[data-theme="dark"] small {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .child-label {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .month-data .label {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .month-data .value {
+    color: #e5e7eb;
+}
+
 /* ============================================
    Enhanced Mobile UX - Responsive Design
    ============================================ */
@@ -2266,7 +2295,7 @@ footer {
 
 .tooltip-content {
     position: absolute;
-    bottom: calc(100% + 10px);
+    top: calc(100% + 10px);
     left: 50%;
     transform: translateX(-50%) scale(0.9);
     background: var(--text-primary);
@@ -2290,11 +2319,11 @@ footer {
 .tooltip-content::after {
     content: '';
     position: absolute;
-    top: 100%;
+    bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
     border: 6px solid transparent;
-    border-top-color: var(--text-primary);
+    border-bottom-color: var(--text-primary);
 }
 
 .tooltip-trigger:hover .tooltip-content,
