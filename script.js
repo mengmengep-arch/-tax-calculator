@@ -3119,4 +3119,435 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         loadFromShareUrl();
     }, 500);
+
+    // Setup star rating
+    setupStarRating();
 });
+
+// =============== About Modal Functions ===============
+
+function openAboutModal() {
+    document.getElementById('aboutModal').classList.add('active');
+}
+
+function closeAboutModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('aboutModal').classList.remove('active');
+}
+
+// =============== Feedback Modal Functions ===============
+
+let currentRating = 0;
+
+function openFeedbackModal() {
+    closeAboutModal();
+    document.getElementById('feedbackModal').classList.add('active');
+}
+
+function closeFeedbackModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('feedbackModal').classList.remove('active');
+    // Reset form
+    document.getElementById('feedbackName').value = '';
+    document.getElementById('feedbackEmail').value = '';
+    document.getElementById('feedbackType').value = 'general';
+    document.getElementById('feedbackMessage').value = '';
+    currentRating = 0;
+    updateStarDisplay();
+}
+
+function setupStarRating() {
+    const stars = document.querySelectorAll('.star-rating .star');
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            currentRating = parseInt(this.dataset.rating);
+            updateStarDisplay();
+        });
+
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.dataset.rating);
+            highlightStars(rating);
+        });
+
+        star.addEventListener('mouseleave', function() {
+            updateStarDisplay();
+        });
+    });
+}
+
+function highlightStars(rating) {
+    const stars = document.querySelectorAll('.star-rating .star');
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.classList.add('active');
+        } else {
+            star.classList.remove('active');
+        }
+    });
+}
+
+function updateStarDisplay() {
+    highlightStars(currentRating);
+    const ratingText = document.getElementById('ratingText');
+    const ratingTexts = ['คลิกดาวเพื่อให้คะแนน', 'ต้องปรับปรุง', 'พอใช้', 'ดี', 'ดีมาก', 'ยอดเยี่ยม!'];
+    ratingText.textContent = ratingTexts[currentRating];
+}
+
+function submitFeedback() {
+    const name = document.getElementById('feedbackName').value.trim();
+    const email = document.getElementById('feedbackEmail').value.trim();
+    const type = document.getElementById('feedbackType').value;
+    const message = document.getElementById('feedbackMessage').value.trim();
+
+    if (!message) {
+        alert('กรุณาใส่ข้อความ Feedback');
+        return;
+    }
+
+    // สร้าง email content
+    const typeLabels = {
+        'general': 'ความคิดเห็นทั่วไป',
+        'bug': 'แจ้งปัญหา/Bug',
+        'feature': 'แนะนำฟีเจอร์ใหม่',
+        'improvement': 'ข้อเสนอแนะปรับปรุง'
+    };
+
+    const subject = encodeURIComponent(`[TaxFlex Feedback] ${typeLabels[type]}`);
+    const body = encodeURIComponent(
+        `=== TaxFlex Feedback ===\n\n` +
+        `ประเภท: ${typeLabels[type]}\n` +
+        `คะแนน: ${currentRating > 0 ? '⭐'.repeat(currentRating) + ` (${currentRating}/5)` : 'ไม่ได้ให้คะแนน'}\n` +
+        `ชื่อ: ${name || 'ไม่ระบุ'}\n` +
+        `อีเมลติดต่อกลับ: ${email || 'ไม่ระบุ'}\n\n` +
+        `ข้อความ:\n${message}\n\n` +
+        `---\n` +
+        `ส่งจาก TaxFlex v3.0.0\n` +
+        `วันที่: ${new Date().toLocaleString('th-TH')}`
+    );
+
+    // เปิด email client
+    const mailtoLink = `mailto:contact@taxflex.app?subject=${subject}&body=${body}`;
+    window.open(mailtoLink, '_blank');
+
+    // แสดง success message
+    alert('ขอบคุณสำหรับ Feedback!\n\nระบบจะเปิดโปรแกรม Email ของคุณ\nกรุณากดส่งเพื่อส่ง Feedback ถึงทีมพัฒนา');
+
+    closeFeedbackModal();
+}
+
+// =============== Share App Link Functions ===============
+
+function shareAppLink() {
+    const appUrl = window.location.origin + window.location.pathname;
+    const shareText = '💰 TaxFlex - คำนวณและวางแผนภาษีอย่างยืดหยุ่น\n\nลองใช้เครื่องมือคำนวณภาษีฟรี!';
+
+    // ถ้ารองรับ Web Share API
+    if (navigator.share) {
+        navigator.share({
+            title: 'TaxFlex - คำนวณภาษี',
+            text: shareText,
+            url: appUrl
+        }).catch(err => {
+            // ถ้า user cancel ก็ไม่ต้องทำอะไร
+            if (err.name !== 'AbortError') {
+                copyAppLink(appUrl);
+            }
+        });
+    } else {
+        copyAppLink(appUrl);
+    }
+}
+
+function copyAppLink(url) {
+    const appUrl = url || window.location.origin + window.location.pathname;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(appUrl).then(() => {
+            showToast('คัดลอกลิงก์แอปแล้ว!', 'success');
+        }).catch(() => {
+            fallbackCopyAppLink(appUrl);
+        });
+    } else {
+        fallbackCopyAppLink(appUrl);
+    }
+}
+
+function fallbackCopyAppLink(url) {
+    const textarea = document.createElement('textarea');
+    textarea.value = url;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        document.execCommand('copy');
+        showToast('คัดลอกลิงก์แอปแล้ว!', 'success');
+    } catch (err) {
+        showToast('ไม่สามารถคัดลอกได้', 'error');
+    }
+    document.body.removeChild(textarea);
+}
+
+function showToast(message, type = 'info') {
+    // สร้าง toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        z-index: 99999;
+        animation: toastSlideUp 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+
+    document.body.appendChild(toast);
+
+    // ลบ toast หลัง 3 วินาที
+    setTimeout(() => {
+        toast.style.animation = 'toastSlideDown 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// =============== Export Functions ===============
+
+function getExportData() {
+    // รวบรวมข้อมูลสำหรับ export
+    const totalIncome = incomeData.totalIncome || 0;
+    const expenses = Math.min(totalIncome * 0.5, 100000);
+    const netIncome = totalIncome - expenses;
+    const basicDeduction = basicDeductions.total || 60000;
+
+    // คำนวณค่าลดหย่อนแผน 1
+    const plan1Items = {};
+    let plan1Total = 0;
+    const deductionLabels = {
+        'lifeInsurance': 'ประกันชีวิต',
+        'healthInsurance': 'ประกันสุขภาพ',
+        'pensionInsurance': 'ประกันบำนาญ',
+        'pvd': 'กองทุน PVD',
+        'rmf': 'กองทุน RMF',
+        'thaiEsg': 'Thai ESG',
+        'thaiEsgx': 'Thai ESGx',
+        'homeLoan': 'ดอกเบี้ยบ้าน',
+        'donationDouble': 'บริจาค 2 เท่า',
+        'donationPolitical': 'บริจาคพรรคการเมือง',
+        'easyEreceipt': 'Easy E-Receipt'
+    };
+
+    Object.keys(deductionLabels).forEach(item => {
+        const checkbox = document.getElementById(`plan1_${item}_check`);
+        const slider = document.getElementById(`plan1_${item}`);
+        const value = (checkbox?.checked && slider) ? parseNumber(slider.value) || 0 : 0;
+        plan1Items[item] = value;
+        plan1Total += value;
+    });
+
+    // คำนวณค่าลดหย่อนแผน 2
+    const plan2Items = {};
+    let plan2Total = 0;
+    Object.keys(deductionLabels).forEach(item => {
+        const checkbox = document.getElementById(`plan2_${item}_check`);
+        const slider = document.getElementById(`plan2_${item}`);
+        const value = (checkbox?.checked && slider) ? parseNumber(slider.value) || 0 : 0;
+        plan2Items[item] = value;
+        plan2Total += value;
+    });
+
+    // คำนวณภาษี
+    const baselineTax = calculateTax(netIncome, basicDeduction);
+    const plan1Tax = calculateTax(netIncome, basicDeduction + plan1Total);
+    const plan2Tax = calculateTax(netIncome, basicDeduction + plan2Total);
+
+    return {
+        date: new Date().toLocaleString('th-TH'),
+        income: {
+            salary: incomeData.salary || 0,
+            bonus: incomeData.bonus || 0,
+            totalIncome,
+            expenses,
+            netIncome
+        },
+        basicDeduction,
+        plan1: {
+            items: plan1Items,
+            total: plan1Total,
+            tax: plan1Tax,
+            savings: baselineTax - plan1Tax
+        },
+        plan2: {
+            items: plan2Items,
+            total: plan2Total,
+            tax: plan2Tax,
+            savings: baselineTax - plan2Tax
+        },
+        baselineTax,
+        deductionLabels
+    };
+}
+
+function exportToCSV() {
+    const data = getExportData();
+
+    // สร้าง CSV content
+    let csv = '\ufeff'; // BOM for UTF-8
+    csv += 'TaxFlex - รายงานการคำนวณภาษี\n';
+    csv += `วันที่: ${data.date}\n\n`;
+
+    // ข้อมูลรายได้
+    csv += '=== ข้อมูลรายได้ ===\n';
+    csv += `เงินเดือนต่อเดือน,${data.income.salary}\n`;
+    csv += `โบนัสรวมต่อปี,${data.income.bonus}\n`;
+    csv += `รายได้รวมต่อปี,${data.income.totalIncome}\n`;
+    csv += `ค่าใช้จ่าย 50%,${data.income.expenses}\n`;
+    csv += `รายได้สุทธิ,${data.income.netIncome}\n\n`;
+
+    // ค่าลดหย่อนพื้นฐาน
+    csv += '=== ค่าลดหย่อนพื้นฐาน ===\n';
+    csv += `รวมค่าลดหย่อนพื้นฐาน,${data.basicDeduction}\n\n`;
+
+    // เปรียบเทียบแผน
+    csv += '=== เปรียบเทียบแผนการลดหย่อน ===\n';
+    csv += 'รายการ,แผน 1,แผน 2\n';
+    Object.keys(data.deductionLabels).forEach(key => {
+        csv += `${data.deductionLabels[key]},${data.plan1.items[key]},${data.plan2.items[key]}\n`;
+    });
+    csv += `รวมค่าลดหย่อนเพิ่มเติม,${data.plan1.total},${data.plan2.total}\n\n`;
+
+    // สรุปภาษี
+    csv += '=== สรุปภาษี ===\n';
+    csv += 'รายการ,ไม่ลดหย่อนเพิ่ม,แผน 1,แผน 2\n';
+    csv += `ภาษีที่ต้องจ่าย (บาท/ปี),${data.baselineTax},${data.plan1.tax},${data.plan2.tax}\n`;
+    csv += `ภาษีที่ต้องจ่าย (บาท/เดือน),${Math.round(data.baselineTax/12)},${Math.round(data.plan1.tax/12)},${Math.round(data.plan2.tax/12)}\n`;
+    csv += `ประหยัดภาษี,-,${data.plan1.savings},${data.plan2.savings}\n`;
+
+    // Download
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `TaxFlex_Report_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+
+    showToast('Export CSV สำเร็จ!', 'success');
+}
+
+function exportToExcel() {
+    const data = getExportData();
+
+    // สร้าง Excel-compatible HTML table
+    let html = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+        <head>
+            <meta charset="UTF-8">
+            <!--[if gte mso 9]>
+            <xml>
+                <x:ExcelWorkbook>
+                    <x:ExcelWorksheets>
+                        <x:ExcelWorksheet>
+                            <x:Name>TaxFlex Report</x:Name>
+                            <x:WorksheetOptions>
+                                <x:DisplayGridlines/>
+                            </x:WorksheetOptions>
+                        </x:ExcelWorksheet>
+                    </x:ExcelWorksheets>
+                </x:ExcelWorkbook>
+            </xml>
+            <![endif]-->
+            <style>
+                table { border-collapse: collapse; }
+                th, td { border: 1px solid #ccc; padding: 8px; }
+                th { background: #667eea; color: white; }
+                .header { background: #f0f0f0; font-weight: bold; }
+                .number { text-align: right; }
+                .highlight { background: #e8f5e9; }
+            </style>
+        </head>
+        <body>
+            <h2>TaxFlex - รายงานการคำนวณภาษี</h2>
+            <p>วันที่: ${data.date}</p>
+
+            <h3>ข้อมูลรายได้</h3>
+            <table>
+                <tr><td class="header">เงินเดือนต่อเดือน</td><td class="number">${formatNumber(data.income.salary)}</td></tr>
+                <tr><td class="header">โบนัสรวมต่อปี</td><td class="number">${formatNumber(data.income.bonus)}</td></tr>
+                <tr><td class="header">รายได้รวมต่อปี</td><td class="number">${formatNumber(data.income.totalIncome)}</td></tr>
+                <tr><td class="header">ค่าใช้จ่าย 50%</td><td class="number">${formatNumber(data.income.expenses)}</td></tr>
+                <tr><td class="header">รายได้สุทธิ</td><td class="number">${formatNumber(data.income.netIncome)}</td></tr>
+                <tr><td class="header">ค่าลดหย่อนพื้นฐาน</td><td class="number">${formatNumber(data.basicDeduction)}</td></tr>
+            </table>
+
+            <h3>เปรียบเทียบแผนการลดหย่อน</h3>
+            <table>
+                <tr>
+                    <th>รายการ</th>
+                    <th>แผน 1</th>
+                    <th>แผน 2</th>
+                </tr>`;
+
+    Object.keys(data.deductionLabels).forEach(key => {
+        html += `<tr>
+            <td>${data.deductionLabels[key]}</td>
+            <td class="number">${formatNumber(data.plan1.items[key])}</td>
+            <td class="number">${formatNumber(data.plan2.items[key])}</td>
+        </tr>`;
+    });
+
+    html += `
+                <tr class="header">
+                    <td>รวมค่าลดหย่อนเพิ่มเติม</td>
+                    <td class="number">${formatNumber(data.plan1.total)}</td>
+                    <td class="number">${formatNumber(data.plan2.total)}</td>
+                </tr>
+            </table>
+
+            <h3>สรุปภาษี</h3>
+            <table>
+                <tr>
+                    <th>รายการ</th>
+                    <th>ไม่ลดหย่อนเพิ่ม</th>
+                    <th>แผน 1</th>
+                    <th>แผน 2</th>
+                </tr>
+                <tr>
+                    <td>ภาษีที่ต้องจ่าย (บาท/ปี)</td>
+                    <td class="number">${formatNumber(data.baselineTax)}</td>
+                    <td class="number">${formatNumber(data.plan1.tax)}</td>
+                    <td class="number">${formatNumber(data.plan2.tax)}</td>
+                </tr>
+                <tr>
+                    <td>ภาษีที่ต้องจ่าย (บาท/เดือน)</td>
+                    <td class="number">${formatNumber(Math.round(data.baselineTax/12))}</td>
+                    <td class="number">${formatNumber(Math.round(data.plan1.tax/12))}</td>
+                    <td class="number">${formatNumber(Math.round(data.plan2.tax/12))}</td>
+                </tr>
+                <tr class="highlight">
+                    <td>ประหยัดภาษี</td>
+                    <td class="number">-</td>
+                    <td class="number">${formatNumber(data.plan1.savings)}</td>
+                    <td class="number">${formatNumber(data.plan2.savings)}</td>
+                </tr>
+            </table>
+
+            <p style="margin-top: 20px; color: #666;">
+                <small>หมายเหตุ: การคำนวณนี้เป็นเพียงการประมาณการ กรุณาตรวจสอบกับกรมสรรพากรเพื่อความถูกต้อง</small>
+            </p>
+        </body>
+        </html>`;
+
+    // Download
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `TaxFlex_Report_${new Date().toISOString().split('T')[0]}.xls`;
+    link.click();
+
+    showToast('Export Excel สำเร็จ!', 'success');
+}

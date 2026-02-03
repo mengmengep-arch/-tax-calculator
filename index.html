@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>คำนวณภาษีเงินได้บุคคลธรรมดา - พนักงานประจำ</title>
+    <title>TaxFlex - คำนวณภาษีเงินได้บุคคลธรรมดา</title>
 
     <!-- PWA Meta Tags -->
-    <meta name="description" content="เครื่องมือคำนวณภาษีเงินได้บุคคลธรรมดาสำหรับพนักงานประจำในประเทศไทย ปีภาษี 2569">
+    <meta name="description" content="TaxFlex - เครื่องมือคำนวณและวางแผนภาษีเงินได้บุคคลธรรมดาสำหรับพนักงานประจำในประเทศไทย ปีภาษี 2569">
     <meta name="theme-color" content="#667eea">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="คำนวณภาษี">
+    <meta name="apple-mobile-web-app-title" content="TaxFlex">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -33,11 +33,15 @@
     <div class="container">
         <header>
             <div class="header-content">
-                <div>
-                    <h1>🧮 คำนวณภาษีเงินได้บุคคลธรรมดา</h1>
-                    <p class="subtitle">สำหรับพนักงานประจำในประเทศไทย (ปีภาษี 2569)</p>
+                <div class="header-logo" onclick="openAboutModal()" style="cursor: pointer;" title="เกี่ยวกับ TaxFlex">
+                    <h1>💰 TaxFlex</h1>
+                    <p class="subtitle">คำนวณและวางแผนภาษี • ปีภาษี 2569</p>
                 </div>
                 <div class="header-buttons">
+                    <!-- About Button -->
+                    <button class="btn-about" onclick="openAboutModal()" title="เกี่ยวกับ TaxFlex">
+                        ℹ️ About
+                    </button>
                     <!-- Dark Mode Toggle -->
                     <div class="theme-toggle" onclick="toggleTheme()" title="เปลี่ยนธีม Light/Dark">
                         <span class="theme-toggle-icon" id="themeIcon">🌙</span>
@@ -47,7 +51,7 @@
                         📄 จัดการสลิป
                     </button>
                     <button class="btn-reset" onclick="resetAllData()" title="ล้างข้อมูลทั้งหมดและเริ่มใหม่">
-                        🔄 Reset Data
+                        🔄 Reset
                     </button>
                 </div>
             </div>
@@ -831,15 +835,17 @@
 
                 <div class="button-group">
                     <button class="btn-prev" onclick="prevStep(3)">← ย้อนกลับ</button>
-                    <button class="share-btn" onclick="openShareModal()" title="แชร์ผลการคำนวณ">🔗 แชร์</button>
-                    <button class="btn-export-pdf" onclick="exportTaxPDF()" title="บันทึกผลการคำนวณเป็น PDF">📥 Export PDF</button>
+                    <button class="share-btn" onclick="shareAppLink()" title="แชร์ลิงก์แอป TaxFlex">🔗 แชร์แอป</button>
+                    <button class="btn-export" onclick="exportToExcel()" title="Export เป็น Excel">📊 Excel</button>
+                    <button class="btn-export" onclick="exportToCSV()" title="Export เป็น CSV">📄 CSV</button>
                     <button class="btn-success" onclick="startOver()">🔄 เริ่มใหม่</button>
                 </div>
             </div>
         </div>
 
         <footer>
-            <p>หมายเหตุ: การคำนวณนี้เป็นเพียงการประมาณการเท่านั้น กรุณาตรวจสอบกับกรมสรรพากรเพื่อความถูกต้อง</p>
+            <p>💰 <strong>TaxFlex</strong> v3.0.0 • คำนวณและวางแผนภาษีอย่างยืดหยุ่น</p>
+            <p class="footer-disclaimer">⚠️ การคำนวณนี้เป็นเพียงการประมาณการเท่านั้น กรุณาตรวจสอบกับกรมสรรพากรเพื่อความถูกต้อง</p>
         </footer>
     </div>
 
@@ -1009,5 +1015,105 @@
             deferredPrompt = null;
         });
     </script>
+
+    <!-- About Modal -->
+    <div class="about-modal" id="aboutModal" onclick="closeAboutModal(event)">
+        <div class="about-modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeAboutModal()">&times;</button>
+            <div class="about-header">
+                <div class="about-logo">💰</div>
+                <h2>TaxFlex</h2>
+                <p class="about-tagline">คำนวณและวางแผนภาษีอย่างยืดหยุ่น</p>
+            </div>
+            <div class="about-body">
+                <div class="about-info">
+                    <div class="about-item">
+                        <span class="about-label">เวอร์ชัน</span>
+                        <span class="about-value">3.0.0</span>
+                    </div>
+                    <div class="about-item">
+                        <span class="about-label">ปีภาษี</span>
+                        <span class="about-value">2569</span>
+                    </div>
+                    <div class="about-item">
+                        <span class="about-label">อัพเดตล่าสุด</span>
+                        <span class="about-value">กุมภาพันธ์ 2569</span>
+                    </div>
+                </div>
+                <div class="about-developer">
+                    <h4>👨‍💻 พัฒนาโดย</h4>
+                    <p class="developer-name">MengMeng Development Team</p>
+                    <p class="developer-email">📧 contact@taxflex.app</p>
+                </div>
+                <div class="about-features">
+                    <h4>✨ คุณสมบัติหลัก</h4>
+                    <ul>
+                        <li>คำนวณภาษีเงินได้บุคคลธรรมดาตามกฎหมาย</li>
+                        <li>เปรียบเทียบแผนลดหย่อนภาษี 2 แผน</li>
+                        <li>รองรับค่าลดหย่อนปี 2569 ครบถ้วน</li>
+                        <li>Export ข้อมูลเป็น Excel/CSV</li>
+                        <li>รองรับ Dark Mode</li>
+                    </ul>
+                </div>
+                <div class="about-disclaimer">
+                    <p>⚠️ <strong>ข้อจำกัดความรับผิดชอบ:</strong> การคำนวณนี้เป็นเพียงการประมาณการเท่านั้น กรุณาตรวจสอบกับกรมสรรพากรเพื่อความถูกต้อง</p>
+                </div>
+            </div>
+            <div class="about-footer">
+                <button class="btn-feedback" onclick="openFeedbackModal()">💬 ให้คะแนน & Feedback</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="feedback-modal" id="feedbackModal" onclick="closeFeedbackModal(event)">
+        <div class="feedback-modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeFeedbackModal()">&times;</button>
+            <div class="feedback-header">
+                <h2>💬 ให้คะแนน & Feedback</h2>
+                <p>ช่วยเราปรับปรุง TaxFlex ให้ดียิ่งขึ้น</p>
+            </div>
+            <div class="feedback-body">
+                <div class="rating-section">
+                    <label>ให้คะแนนความพึงพอใจ</label>
+                    <div class="star-rating" id="starRating">
+                        <span class="star" data-rating="1">⭐</span>
+                        <span class="star" data-rating="2">⭐</span>
+                        <span class="star" data-rating="3">⭐</span>
+                        <span class="star" data-rating="4">⭐</span>
+                        <span class="star" data-rating="5">⭐</span>
+                    </div>
+                    <p class="rating-text" id="ratingText">คลิกดาวเพื่อให้คะแนน</p>
+                </div>
+                <div class="feedback-form">
+                    <div class="form-group">
+                        <label for="feedbackName">ชื่อ (ไม่บังคับ)</label>
+                        <input type="text" id="feedbackName" placeholder="ชื่อของคุณ">
+                    </div>
+                    <div class="form-group">
+                        <label for="feedbackEmail">อีเมล (ไม่บังคับ)</label>
+                        <input type="email" id="feedbackEmail" placeholder="email@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="feedbackType">ประเภท Feedback</label>
+                        <select id="feedbackType">
+                            <option value="general">ความคิดเห็นทั่วไป</option>
+                            <option value="bug">แจ้งปัญหา/Bug</option>
+                            <option value="feature">แนะนำฟีเจอร์ใหม่</option>
+                            <option value="improvement">ข้อเสนอแนะปรับปรุง</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="feedbackMessage">ข้อความ *</label>
+                        <textarea id="feedbackMessage" rows="4" placeholder="กรุณาใส่ความคิดเห็นหรือข้อเสนอแนะของคุณ..." required></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="feedback-footer">
+                <button class="btn-cancel" onclick="closeFeedbackModal()">ยกเลิก</button>
+                <button class="btn-submit-feedback" onclick="submitFeedback()">📧 ส่ง Feedback</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
