@@ -2977,10 +2977,37 @@ async function shareViaWebShare() {
 function openCompareModal() {
     const modal = document.getElementById('compareModal');
 
-    // Get tax amounts
-    const baselineTax = parseNumberWithComma(document.getElementById('finalBaselineTax')?.textContent) || 0;
-    const plan1Tax = parseNumberWithComma(document.getElementById('finalPlan1Tax')?.textContent) || 0;
-    const plan2Tax = parseNumberWithComma(document.getElementById('finalPlan2Tax')?.textContent) || 0;
+    // คำนวณค่าภาษีโดยตรง (ไม่ดึงจาก Step 4)
+    const totalIncome = incomeData.totalIncome || 0;
+    const expenses = Math.min(totalIncome * 0.5, 100000);
+    const netIncome = totalIncome - expenses;
+    const basicDeduction = basicDeductions.total || 60000;
+
+    // คำนวณค่าลดหย่อนแผน 1
+    let plan1Deduction = 0;
+    const plan1Items = ['lifeInsurance', 'healthInsurance', 'pensionInsurance', 'pvd', 'rmf', 'thaiEsg', 'thaiEsgx', 'homeLoan', 'donationDouble', 'donationPolitical', 'easyEreceipt'];
+    plan1Items.forEach(item => {
+        const checkbox = document.getElementById(`plan1_${item}_check`);
+        const slider = document.getElementById(`plan1_${item}`);
+        if (checkbox?.checked && slider) {
+            plan1Deduction += parseNumber(slider.value) || 0;
+        }
+    });
+
+    // คำนวณค่าลดหย่อนแผน 2
+    let plan2Deduction = 0;
+    plan1Items.forEach(item => {
+        const checkbox = document.getElementById(`plan2_${item}_check`);
+        const slider = document.getElementById(`plan2_${item}`);
+        if (checkbox?.checked && slider) {
+            plan2Deduction += parseNumber(slider.value) || 0;
+        }
+    });
+
+    // คำนวณภาษี
+    const baselineTax = calculateTax(netIncome, basicDeduction);
+    const plan1Tax = calculateTax(netIncome, basicDeduction + plan1Deduction);
+    const plan2Tax = calculateTax(netIncome, basicDeduction + plan2Deduction);
 
     // Determine best plan
     const taxes = [
