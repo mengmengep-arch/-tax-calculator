@@ -2690,6 +2690,71 @@ footer {
     color: #ef4444;
 }
 
+/* Dark mode for Compare Modal */
+[data-theme="dark"] .compare-modal-content {
+    background: #1e1e2e;
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .compare-modal-content h2,
+[data-theme="dark"] .compare-details-title {
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .compare-card {
+    background: #252538;
+    border-color: #3f3f5a;
+}
+
+[data-theme="dark"] .compare-card.best {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #10b981;
+}
+
+[data-theme="dark"] .compare-card-title {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .compare-card-amount {
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .compare-card-monthly {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .compare-card-savings {
+    border-top-color: #3f3f5a;
+    color: #34d399;
+}
+
+[data-theme="dark"] .compare-details {
+    border-top-color: #3f3f5a;
+}
+
+[data-theme="dark"] .compare-table th {
+    background: #252538;
+    color: #e5e7eb;
+}
+
+[data-theme="dark"] .compare-table td {
+    color: #e5e7eb;
+    border-bottom-color: #3f3f5a;
+}
+
+[data-theme="dark"] .compare-table th,
+[data-theme="dark"] .compare-table td {
+    border-bottom-color: #3f3f5a;
+}
+
+[data-theme="dark"] .compare-diff {
+    color: #34d399;
+}
+
+[data-theme="dark"] .compare-diff.negative {
+    color: #f87171;
+}
+
 @media (max-width: 768px) {
     .compare-grid {
         grid-template-columns: 1fr;
