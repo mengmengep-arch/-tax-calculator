@@ -1,5 +1,5 @@
 // =============== Global Variables ===============
-const CURRENT_YEAR = 2568;
+const CURRENT_YEAR = 2569;
 const THAI_MONTHS = [
     'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
     'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // =============== Data Management ===============
 function loadSalaryData() {
-    const saved = localStorage.getItem('salarySlips_2568');
+    const saved = localStorage.getItem('salarySlips_2569');
     if (saved) {
         try {
             salaryData = JSON.parse(saved);
@@ -37,7 +37,7 @@ function loadSalaryData() {
 
 function saveSalaryData() {
     try {
-        localStorage.setItem('salarySlips_2568', JSON.stringify(salaryData));
+        localStorage.setItem('salarySlips_2569', JSON.stringify(salaryData));
         console.log('✅ Saved salary data');
     } catch (e) {
         console.error('❌ Error saving salary data:', e);
@@ -62,7 +62,7 @@ function renderMonths() {
 
         let content = `
             <div class="month-header">
-                <div class="month-title">🗓️ ${THAI_MONTHS[i-1]} 2568</div>
+                <div class="month-title">🗓️ ${THAI_MONTHS[i-1]} ${CURRENT_YEAR}</div>
                 <div class="month-actions">
                     ${hasData ? `
                         <button class="btn-small btn-edit" onclick="editMonth('${monthKey}')">แก้ไข</button>
@@ -153,7 +153,7 @@ function updateSummary() {
 // =============== Modal Functions ===============
 function addMonth(monthKey) {
     currentEditingMonth = monthKey;
-    document.getElementById('modalTitle').textContent = `เพิ่มข้อมูล ${THAI_MONTHS[parseInt(monthKey) - 1]} 2568`;
+    document.getElementById('modalTitle').textContent = `เพิ่มข้อมูล ${THAI_MONTHS[parseInt(monthKey) - 1]} ${CURRENT_YEAR}`;
     document.getElementById('currentMonth').value = monthKey;
 
     // Reset form
@@ -169,7 +169,7 @@ function editMonth(monthKey) {
     currentEditingMonth = monthKey;
     const data = salaryData[monthKey];
 
-    document.getElementById('modalTitle').textContent = `แก้ไข ${THAI_MONTHS[parseInt(monthKey) - 1]} 2568`;
+    document.getElementById('modalTitle').textContent = `แก้ไข ${THAI_MONTHS[parseInt(monthKey) - 1]} ${CURRENT_YEAR}`;
     document.getElementById('currentMonth').value = monthKey;
 
     // Fill form - INCOME
@@ -206,7 +206,7 @@ function editMonth(monthKey) {
 }
 
 function deleteMonth(monthKey) {
-    if (confirm(`ต้องการลบข้อมูล ${THAI_MONTHS[parseInt(monthKey) - 1]} 2568 หรือไม่?`)) {
+    if (confirm(`ต้องการลบข้อมูล ${THAI_MONTHS[parseInt(monthKey) - 1]} ${CURRENT_YEAR} หรือไม่?`)) {
         delete salaryData[monthKey];
         saveSalaryData();
         renderMonths();

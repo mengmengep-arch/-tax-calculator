@@ -866,8 +866,12 @@
     <script>
         // Load theme from localStorage (sync with main app)
         function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
+            // ลองอ่านจาก key ใหม่ก่อน แล้วค่อย fallback เป็น key เก่า
+            const savedTheme = localStorage.getItem('theme') || localStorage.getItem('taxCalc_theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
+            // Sync ทั้งสอง key
+            localStorage.setItem('theme', savedTheme);
+            localStorage.setItem('taxCalc_theme', savedTheme);
             updateThemeUI(savedTheme);
         }
 
@@ -887,7 +891,9 @@
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
+            // ใช้ทั้งสอง key เพื่อให้ sync กับทุกหน้า
             localStorage.setItem('theme', newTheme);
+            localStorage.setItem('taxCalc_theme', newTheme);
             updateThemeUI(newTheme);
         }
 

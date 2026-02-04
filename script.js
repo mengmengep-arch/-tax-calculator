@@ -2311,7 +2311,9 @@ function toggleTheme() {
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
     html.setAttribute('data-theme', newTheme);
+    // ใช้ทั้งสอง key เพื่อให้ sync กับทุกหน้า
     localStorage.setItem('taxCalc_theme', newTheme);
+    localStorage.setItem('theme', newTheme);
 
     updateThemeUI(newTheme);
 
@@ -2352,8 +2354,12 @@ function updateChartColors(theme) {
 }
 
 function initTheme() {
-    const savedTheme = localStorage.getItem('taxCalc_theme') || 'light';
+    // ลองอ่านจาก key ใหม่ก่อน แล้วค่อย fallback เป็น key เก่า
+    const savedTheme = localStorage.getItem('theme') || localStorage.getItem('taxCalc_theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
+    // Sync ทั้งสอง key
+    localStorage.setItem('theme', savedTheme);
+    localStorage.setItem('taxCalc_theme', savedTheme);
     updateThemeUI(savedTheme);
 }
 
@@ -3056,7 +3062,10 @@ function generateDetailedComparison() {
         { label: 'RMF', p1: 'plan1_rmf', p2: 'plan2_rmf' },
         { label: 'Thai ESG', p1: 'plan1_thaiEsg', p2: 'plan2_thaiEsg' },
         { label: 'Thai ESGx', p1: 'plan1_thaiEsgx', p2: 'plan2_thaiEsgx' },
-        { label: 'ดอกเบี้ยบ้าน', p1: 'plan1_homeLoan', p2: 'plan2_homeLoan' }
+        { label: 'ดอกเบี้ยบ้าน', p1: 'plan1_homeLoan', p2: 'plan2_homeLoan' },
+        { label: 'บริจาค 2 เท่า', p1: 'plan1_donationDouble', p2: 'plan2_donationDouble' },
+        { label: 'บริจาคพรรคการเมือง', p1: 'plan1_donationPolitical', p2: 'plan2_donationPolitical' },
+        { label: 'Easy E-Receipt', p1: 'plan1_easyEreceipt', p2: 'plan2_easyEreceipt' }
     ];
 
     let rows = items.map(item => {
