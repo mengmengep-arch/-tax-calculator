@@ -354,11 +354,11 @@ function checkAndLoadSalarySlipsData() {
         }
 
         if (socialSecuritySlider) {
-            // ประกันสังคมก็หารด้วย 12 เช่นกัน
-            const monthlySS = Math.round((data.socialSecurity || 0) / 12);
-            socialSecuritySlider.value = monthlySS;
-            document.getElementById('socialSecurity').value = formatNumber(monthlySS);
-            document.getElementById('socialSecurityDisplay').textContent = formatNumber(monthlySS);
+            // ประกันสังคม: ใช้ค่ารายปีตรงๆ (UI รับ input เป็นรายปี)
+            const annualSS = Math.min(data.socialSecurity || 0, 10000);
+            socialSecuritySlider.value = annualSS;
+            document.getElementById('socialSecurity').value = formatNumber(annualSS);
+            document.getElementById('socialSecurityDisplay').textContent = formatNumber(annualSS);
         }
 
         // Remove the flag so it doesn't auto-fill again
@@ -437,7 +437,8 @@ function saveBasicDeductions() {
         total += parentHealthAmount;
     }
 
-    const socialSecurity = Math.min(parseNumberWithComma(document.getElementById('socialSecurity').value) * 12, 10000);
+    // ประกันสังคม: input เป็นรายปีอยู่แล้ว (ไม่ต้อง * 12)
+    const socialSecurity = Math.min(parseNumberWithComma(document.getElementById('socialSecurity').value), 10000);
     total += socialSecurity;
 
     basicDeductions = { total };
@@ -489,7 +490,8 @@ function updateBasicDeductionPreview() {
         total += parentHealthAmount;
     }
 
-    const socialSecurity = Math.min(parseNumberWithComma(document.getElementById('socialSecurity').value || 0) * 12, 10000);
+    // ประกันสังคม: input เป็นรายปีอยู่แล้ว (ไม่ต้อง * 12)
+    const socialSecurity = Math.min(parseNumberWithComma(document.getElementById('socialSecurity').value || 0), 10000);
     total += socialSecurity;
 
     document.getElementById('basicDeductionPreview').textContent = formatNumber(total);
@@ -956,7 +958,7 @@ function createRecommendation(baseline, plan1, plan2, plan1Ded, plan2Ded) {
             <ul>
                 <li>ประหยัดภาษีได้ถึง ${formatNumber(savings2)} บาท/ปี</li>
                 <li>ต้องลงทุนในกองทุน/ลดหย่อนเพิ่ม: ${formatNumber(plan2Ded)} บาท</li>
-                <li>คุ้มค่าเพราะใช้สิทธิ์พิเศษปี 2568 (Thai ESGx, บริจาค 2 เท่า)</li>
+                <li>คุ้มค่าเพราะใช้สิทธิ์พิเศษปี 2569 (Thai ESGx, บริจาค 2 เท่า)</li>
                 <li>ROI จากการลดภาษี: ${((savings2/plan2Ded)*100).toFixed(1)}%</li>
             </ul>
         `;
@@ -2983,32 +2985,15 @@ async function shareViaWebShare() {
 function openCompareModal() {
     const modal = document.getElementById('compareModal');
 
-    // คำนวณค่าภาษีโดยตรง (ไม่ดึงจาก Step 4)
+    // คำนวณค่าภาษีโดยใช้ฟังก์ชันที่มี limits ถูกต้อง
     const totalIncome = incomeData.totalIncome || 0;
     const expenses = Math.min(totalIncome * 0.5, 100000);
     const netIncome = totalIncome - expenses;
     const basicDeduction = basicDeductions.total || 60000;
 
-    // คำนวณค่าลดหย่อนแผน 1
-    let plan1Deduction = 0;
-    const plan1Items = ['lifeInsurance', 'healthInsurance', 'pensionInsurance', 'pvd', 'rmf', 'thaiEsg', 'thaiEsgx', 'homeLoan', 'donationDouble', 'donationPolitical', 'easyEreceipt'];
-    plan1Items.forEach(item => {
-        const checkbox = document.getElementById(`plan1_${item}_check`);
-        const slider = document.getElementById(`plan1_${item}`);
-        if (checkbox?.checked && slider) {
-            plan1Deduction += parseNumber(slider.value) || 0;
-        }
-    });
-
-    // คำนวณค่าลดหย่อนแผน 2
-    let plan2Deduction = 0;
-    plan1Items.forEach(item => {
-        const checkbox = document.getElementById(`plan2_${item}_check`);
-        const slider = document.getElementById(`plan2_${item}`);
-        if (checkbox?.checked && slider) {
-            plan2Deduction += parseNumber(slider.value) || 0;
-        }
-    });
+    // ใช้ฟังก์ชันที่คำนวณ limits ถูกต้อง (100K ประกัน, 500K กองทุน, บริจาค 2 เท่า)
+    const plan1Deduction = getPlan1Deductions();
+    const plan2Deduction = getPlan2Deductions();
 
     // คำนวณภาษี
     const baselineTax = calculateTax(netIncome, basicDeduction);
