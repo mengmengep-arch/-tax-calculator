@@ -315,7 +315,25 @@ python -m http.server 8000
 
 ## 📅 การอัพเดท
 
-### เวอร์ชัน 3.0 (2 ก.พ. 2569) 🆕🔥
+### เวอร์ชัน 3.0.1 (4 ก.พ. 2569) 🆕
+**Bug Fixes & Dark Mode Improvements**
+
+#### 🐛 Bug Fixes
+- 🔧 **Theme Sync** - แก้ไขปุ่ม Dark Mode ให้ sync ระหว่างหน้าหลักและหน้าสลิป
+- 🧮 **Social Security** - แก้ไข bug คำนวณประกันสังคม (ไม่คูณ 12 ซ้ำ)
+- 📊 **Compare Modal** - แก้ไขการคำนวณให้ใช้ limits ที่ถูกต้อง
+
+#### 🌙 Dark Mode Improvements
+- 📈 **Pie Charts** - เพิ่มสีตัวอักษรที่อ่านง่ายใน Dark Mode
+- 🎨 **Headings** - ปรับสี h2, h3 ให้อ่านง่ายขึ้นในธีมมืด
+- 🃏 **Summary Cards** - ปรับสีหัวข้อการ์ดใน Step 4
+
+#### 🗑️ Removed
+- ❌ **Easy E-Receipt** - ลบออกเนื่องจากยังไม่มีประกาศมาตรการปี 2569
+
+---
+
+### เวอร์ชัน 3.0 (2 ก.พ. 2569)
 **Major UI/UX Overhaul + PWA Support**
 
 #### 🎨 UI/UX Improvements
