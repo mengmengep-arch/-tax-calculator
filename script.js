@@ -1028,6 +1028,10 @@ function createPieCharts() {
     const plan1Breakdown = getDeductionBreakdown('plan1');
     const plan2Breakdown = getDeductionBreakdown('plan2');
 
+    // ตรวจสอบ theme ปัจจุบัน
+    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDarkMode ? '#e4e4e7' : '#333';
+
     // สีสำหรับแต่ละรายการ (เหมือนกราฟหลัก)
     const colors = {
         'ประกันชีวิต': '#FF6B6B',
@@ -1059,7 +1063,7 @@ function createPieCharts() {
                     datasets: [{
                         data: plan1Data,
                         backgroundColor: plan1Colors,
-                        borderColor: '#fff',
+                        borderColor: isDarkMode ? '#1e1e2e' : '#fff',
                         borderWidth: 2
                     }]
                 },
@@ -1071,7 +1075,8 @@ function createPieCharts() {
                             position: 'bottom',
                             labels: {
                                 boxWidth: 12,
-                                font: { size: 11 }
+                                font: { size: 11 },
+                                color: textColor
                             }
                         },
                         tooltip: {
@@ -1088,7 +1093,8 @@ function createPieCharts() {
                         title: {
                             display: true,
                             text: 'สัดส่วนการลดหย่อน - แผน 1',
-                            font: { size: 14, weight: 'bold' }
+                            font: { size: 14, weight: 'bold' },
+                            color: textColor
                         }
                     }
                 }
@@ -1113,7 +1119,7 @@ function createPieCharts() {
                     datasets: [{
                         data: plan2Data,
                         backgroundColor: plan2Colors,
-                        borderColor: '#fff',
+                        borderColor: isDarkMode ? '#1e1e2e' : '#fff',
                         borderWidth: 2
                     }]
                 },
@@ -1125,7 +1131,8 @@ function createPieCharts() {
                             position: 'bottom',
                             labels: {
                                 boxWidth: 12,
-                                font: { size: 11 }
+                                font: { size: 11 },
+                                color: textColor
                             }
                         },
                         tooltip: {
@@ -1142,7 +1149,8 @@ function createPieCharts() {
                         title: {
                             display: true,
                             text: 'สัดส่วนการลดหย่อน - แผน 2',
-                            font: { size: 14, weight: 'bold' }
+                            font: { size: 14, weight: 'bold' },
+                            color: textColor
                         }
                     }
                 }
@@ -2336,18 +2344,35 @@ function updateThemeUI(theme) {
 }
 
 function updateChartColors(theme) {
-    if (!chartInstance) return;
-
     const textColor = theme === 'dark' ? '#e4e4e7' : '#333';
     const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+    const borderColor = theme === 'dark' ? '#1e1e2e' : '#fff';
 
-    chartInstance.options.scales.x.ticks.color = textColor;
-    chartInstance.options.scales.y.ticks.color = textColor;
-    chartInstance.options.scales.x.grid.color = gridColor;
-    chartInstance.options.scales.y.grid.color = gridColor;
-    chartInstance.options.plugins.legend.labels.color = textColor;
+    // อัปเดต Bar Chart (main chart)
+    if (chartInstance) {
+        chartInstance.options.scales.x.ticks.color = textColor;
+        chartInstance.options.scales.y.ticks.color = textColor;
+        chartInstance.options.scales.x.grid.color = gridColor;
+        chartInstance.options.scales.y.grid.color = gridColor;
+        chartInstance.options.plugins.legend.labels.color = textColor;
+        chartInstance.update();
+    }
 
-    chartInstance.update();
+    // อัปเดต Pie Chart 1
+    if (pieChart1) {
+        pieChart1.options.plugins.legend.labels.color = textColor;
+        pieChart1.options.plugins.title.color = textColor;
+        pieChart1.data.datasets[0].borderColor = borderColor;
+        pieChart1.update();
+    }
+
+    // อัปเดต Pie Chart 2
+    if (pieChart2) {
+        pieChart2.options.plugins.legend.labels.color = textColor;
+        pieChart2.options.plugins.title.color = textColor;
+        pieChart2.data.datasets[0].borderColor = borderColor;
+        pieChart2.update();
+    }
 }
 
 function initTheme() {

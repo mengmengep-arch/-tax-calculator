@@ -385,11 +385,20 @@ h2 {
     transition: color var(--transition-normal);
 }
 
+[data-theme="dark"] h2 {
+    color: #818cf8;
+    border-color: #818cf8;
+}
+
 h3 {
     color: var(--secondary);
     margin: 25px 0 15px;
     font-size: 1.3rem;
     transition: color var(--transition-normal);
+}
+
+[data-theme="dark"] h3 {
+    color: #a78bfa;
 }
 
 /* Form Elements */
@@ -957,6 +966,15 @@ small {
     color: #34d399;
 }
 
+.summary-card h3 {
+    color: var(--text-primary);
+    transition: color var(--transition-normal);
+}
+
+[data-theme="dark"] .summary-card h3 {
+    color: #e4e4e7;
+}
+
 /* Recommendation */
 .recommendation {
     background: linear-gradient(135deg, rgba(17, 153, 142, 0.08) 0%, rgba(56, 239, 125, 0.08) 100%);
@@ -1233,6 +1251,15 @@ small {
 
 [data-theme="dark"] .detailed-breakdown tbody tr:hover {
     background: rgba(102, 126, 234, 0.1);
+}
+
+.detailed-breakdown h3 {
+    color: var(--text-primary);
+    transition: color var(--transition-normal);
+}
+
+[data-theme="dark"] .detailed-breakdown h3 {
+    color: #e4e4e7;
 }
 
 /* Footer */
