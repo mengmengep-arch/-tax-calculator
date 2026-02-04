@@ -106,8 +106,7 @@ function exportTaxPDF() {
         { id: 'thaiEsgx', name: 'Thai ESGx', max: '300,000' },
         { id: 'homeLoan', name: 'ดอกเบี้ยบ้าน', max: '100,000' },
         { id: 'donationDouble', name: 'บริจาค 2 เท่า', max: '10%' },
-        { id: 'donationPolitical', name: 'บริจาคพรรคการเมือง', max: '10,000' },
-        { id: 'easyEreceipt', name: 'Easy E-Receipt', max: '50,000' }
+        { id: 'donationPolitical', name: 'บริจาคพรรคการเมือง', max: '10,000' }
     ];
 
     let plan1Items = [];
@@ -155,7 +154,7 @@ function exportTaxPDF() {
     const pdfContent = `
         <div style="font-family: 'Sarabun', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto;">
             <h1 style="text-align: center; color: #667eea; margin-bottom: 10px;">📊 ผลการคำนวณภาษีเงินได้</h1>
-            <p style="text-align: center; color: #666; margin-bottom: 30px;">ปีภาษี 2568</p>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">ปีภาษี 2569</p>
             <p style="text-align: center; color: #999; font-size: 0.9rem; margin-bottom: 40px;">สร้างเมื่อ: ${thaiDate}</p>
 
             <!-- Step 1: ข้อมูลรายได้ -->
@@ -356,7 +355,7 @@ function exportTaxPDF() {
  */
 function exportSalarySlipsPDF() {
     // Get salary data from localStorage
-    const saved = localStorage.getItem('salarySlips_2568');
+    const saved = localStorage.getItem('salarySlips_2569');
     let salaryData = {};
     if (saved) {
         try {
@@ -423,7 +422,7 @@ function exportSalarySlipsPDF() {
 
             monthRowsHTML += `
                 <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd;">${monthName} 2568</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">${monthName} 2569</td>
                     <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${formatNumber(income)} บาท</td>
                     <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${formatNumber(deduct)} บาท</td>
                     <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold;">${formatNumber(net)} บาท</td>
@@ -432,7 +431,7 @@ function exportSalarySlipsPDF() {
         } else {
             monthRowsHTML += `
                 <tr style="background: #f5f5f5;">
-                    <td style="padding: 10px; border: 1px solid #ddd;">${monthName} 2568</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">${monthName} 2569</td>
                     <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #999;" colspan="3">ยังไม่มีข้อมูล</td>
                 </tr>
             `;
@@ -456,7 +455,7 @@ function exportSalarySlipsPDF() {
     const pdfContent = `
         <div style="font-family: 'Sarabun', Arial, sans-serif; padding: 40px; max-width: 900px; margin: 0 auto;">
             <h1 style="text-align: center; color: #667eea; margin-bottom: 10px;">📄 สรุปสลิปเงินเดือน</h1>
-            <p style="text-align: center; color: #666; margin-bottom: 30px;">ปีภาษี 2568</p>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">ปีภาษี 2569</p>
             <p style="text-align: center; color: #999; font-size: 0.9rem; margin-bottom: 40px;">สร้างเมื่อ: ${thaiDate}</p>
 
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px; margin-bottom: 30px;">
@@ -522,7 +521,7 @@ function exportSalarySlipsPDF() {
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>สรุปสลิปเงินเดือน_2568_${fileDate}</title>
+            <title>สรุปสลิปเงินเดือน_2569_${fileDate}</title>
             <style>
                 @media print {
                     body { margin: 0; padding: 20px; }

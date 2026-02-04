@@ -4,7 +4,7 @@ This document provides essential information for AI assistants working with this
 
 ## Project Overview
 
-**Thai Tax Calculator 2568** (ปีภาษี 2568/2025) is a web-based personal income tax calculator for salaried employees in Thailand. It features a wizard-based UI, salary slip OCR, and tax planning simulations.
+**Thai Tax Calculator 2569** (ปีภาษี 2569/2026) is a web-based personal income tax calculator for salaried employees in Thailand. It features a wizard-based UI, salary slip OCR, and tax planning simulations.
 
 **Tech Stack:** Vanilla JavaScript, HTML5, CSS3, Node.js (optional backend)
 **Version:** 2.1
@@ -104,7 +104,7 @@ npm start      # Production
 // ============================================================
 ```
 
-## Thai Tax Calculation Rules (2568)
+## Thai Tax Calculation Rules (2569)
 
 ### Tax Brackets
 ```
@@ -123,7 +123,6 @@ npm start      # Production
 - **Insurance total (life + health):** max 100,000 ฿
 - **Retirement funds (pension + PVD + RMF):** max 500,000 ฿
 - **Thai ESG + Thai ESGx:** each max 300,000 ฿ (30% of income)
-- **Easy E-Receipt 2.0:** max 50,000 ฿
 - **Donations (double deduction):** max 10% of net income
 
 ### Key Calculation Functions
@@ -138,7 +137,7 @@ npm start      # Production
 | `taxCalc_incomeData` | Income data from Step 1 |
 | `taxCalc_basicDeductions` | Basic deductions from Step 2 |
 | `taxCalc_planData` | Plan 1 & 2 detailed deduction values |
-| `salarySlips_2568` | Monthly salary slip data |
+| `salarySlips_2569` | Monthly salary slip data |
 | `ocrSettings` | OCR engine preference & API key |
 | `taxCalculationData` | Cross-page data transfer |
 

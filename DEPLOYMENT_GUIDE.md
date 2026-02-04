@@ -112,7 +112,7 @@ echo "node_modules/" >> .gitignore
 # Initialize git
 git init
 git add index.html salary-slips.html test-pvd.html styles.css script.js salary-slips.js test-pvd.js .gitignore
-git commit -m "Initial commit - Tax Calculator 2568"
+git commit -m "Initial commit - Tax Calculator 2569"
 git branch -M main
 git remote add origin https://github.com/YOUR_USERNAME/tax-calculator.git
 git push -u origin main
@@ -187,7 +187,7 @@ const BACKEND_URL = 'https://tax-calculator-backend.vercel.app/api/ocr';
 ส่งข้อความนี้:
 
 ```
-🎉 Tax Calculator 2568 - คำนวณภาษีฟรี!
+🎉 Tax Calculator 2569 - คำนวณภาษีฟรี!
 
 ✅ คำนวณภาษีอัตโนมัติ
 ✅ บันทึกสลิปเงินเดือน
