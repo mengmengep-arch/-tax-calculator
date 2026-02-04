@@ -836,6 +836,11 @@ function createFinalChart(baseline, plan1, plan2) {
         chartInstance.destroy();
     }
 
+    // ตรวจสอบ theme ปัจจุบัน
+    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDarkMode ? '#e4e4e7' : '#333';
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
     // รับข้อมูลรายละเอียดการลดหย่อน
     const plan1Breakdown = getDeductionBreakdown('plan1');
     const plan2Breakdown = getDeductionBreakdown('plan2');
@@ -894,16 +899,20 @@ function createFinalChart(baseline, plan1, plan2) {
             maintainAspectRatio: true,
             scales: {
                 x: {
-                    stacked: false
+                    stacked: false,
+                    ticks: { color: textColor },
+                    grid: { color: gridColor }
                 },
                 y: {
                     stacked: false,
                     beginAtZero: true,
                     ticks: {
+                        color: textColor,
                         callback: function(value) {
                             return formatNumber(value) + ' บาท';
                         }
-                    }
+                    },
+                    grid: { color: gridColor }
                 }
             },
             plugins: {
@@ -912,9 +921,8 @@ function createFinalChart(baseline, plan1, plan2) {
                     position: 'top',
                     labels: {
                         boxWidth: 12,
-                        font: {
-                            size: 10
-                        }
+                        font: { size: 10 },
+                        color: textColor
                     }
                 },
                 tooltip: {
@@ -929,10 +937,8 @@ function createFinalChart(baseline, plan1, plan2) {
                 title: {
                     display: true,
                     text: 'เปรียบเทียบภาษีและการลดหย่อน',
-                    font: {
-                        size: 16,
-                        weight: 'bold'
-                    }
+                    font: { size: 16, weight: 'bold' },
+                    color: textColor
                 }
             }
         }
@@ -2355,6 +2361,7 @@ function updateChartColors(theme) {
         chartInstance.options.scales.x.grid.color = gridColor;
         chartInstance.options.scales.y.grid.color = gridColor;
         chartInstance.options.plugins.legend.labels.color = textColor;
+        chartInstance.options.plugins.title.color = textColor;
         chartInstance.update();
     }
 
