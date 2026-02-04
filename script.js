@@ -2285,7 +2285,8 @@ function loadSavedData() {
             total += Math.min(parseNumberWithComma(data.parentHealthInsuranceAmount || 0), 15000);
         }
         if (data.socialSecurity) {
-            const socialSecurity = Math.min(parseNumberWithComma(data.socialSecurity) * 12, 10000);
+            // ประกันสังคม: input เป็นรายปีอยู่แล้ว (ไม่ต้อง * 12)
+            const socialSecurity = Math.min(parseNumberWithComma(data.socialSecurity), 10000);
             total += socialSecurity;
         }
         basicDeductions = { total };
