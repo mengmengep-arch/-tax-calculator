@@ -1262,6 +1262,17 @@ small {
     color: #e4e4e7;
 }
 
+.detailed-breakdown h4 {
+    color: var(--text-primary);
+    margin: 20px 0 10px;
+    font-size: 1.1rem;
+    transition: color var(--transition-normal);
+}
+
+[data-theme="dark"] .detailed-breakdown h4 {
+    color: #e4e4e7;
+}
+
 /* Footer */
 footer {
     text-align: center;
