@@ -106,8 +106,7 @@ function exportTaxPDF() {
         { id: 'thaiEsgx', name: 'Thai ESGx', max: '300,000' },
         { id: 'homeLoan', name: 'ดอกเบี้ยบ้าน', max: '100,000' },
         { id: 'donationDouble', name: 'บริจาค 2 เท่า', max: '10%' },
-        { id: 'donationPolitical', name: 'บริจาคพรรคการเมือง', max: '10,000' },
-        { id: 'easyEreceipt', name: 'Easy E-Receipt', max: '50,000' }
+        { id: 'donationPolitical', name: 'บริจาคพรรคการเมือง', max: '10,000' }
     ];
 
     let plan1Items = [];

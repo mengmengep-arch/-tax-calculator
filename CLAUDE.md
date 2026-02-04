@@ -123,7 +123,6 @@ npm start      # Production
 - **Insurance total (life + health):** max 100,000 ฿
 - **Retirement funds (pension + PVD + RMF):** max 500,000 ฿
 - **Thai ESG + Thai ESGx:** each max 300,000 ฿ (30% of income)
-- **Easy E-Receipt 2.0:** max 50,000 ฿
 - **Donations (double deduction):** max 10% of net income
 
 ### Key Calculation Functions

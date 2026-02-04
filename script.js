@@ -70,7 +70,7 @@ function savePlanData() {
         const deductionItems = [
             'lifeInsurance', 'healthInsurance', 'pensionInsurance',
             'pvd', 'rmf', 'thaiEsg', 'thaiEsgx',
-            'homeLoan', 'donationDouble', 'donationPolitical', 'easyEreceipt'
+            'homeLoan', 'donationDouble', 'donationPolitical'
         ];
 
         // บันทึกค่าของทั้ง Plan 1 และ Plan 2
@@ -550,7 +550,7 @@ function getPlan1Deductions() {
     let total = 0;
 
     // รวบรวมค่าลดหย่อนจาก Plan 1
-    const items = ['lifeInsurance', 'healthInsurance', 'pensionInsurance', 'pvd', 'rmf', 'thaiEsg', 'thaiEsgx', 'homeLoan', 'donationDouble', 'donationPolitical', 'easyEreceipt'];
+    const items = ['lifeInsurance', 'healthInsurance', 'pensionInsurance', 'pvd', 'rmf', 'thaiEsg', 'thaiEsgx', 'homeLoan', 'donationDouble', 'donationPolitical'];
 
     // คำนวณประกันชีวิต + ประกันสุขภาพ (รวมไม่เกิน 100K) ก่อน
     let insuranceTotal = 0;
@@ -614,7 +614,6 @@ function getPlan1Deductions() {
             else if (item === 'homeLoan') value = Math.min(value, 100000);
             else if (item === 'donationDouble') value = Math.min(value * 2, netIncome * 0.10); // 2 เท่า!
             else if (item === 'donationPolitical') value = Math.min(value, 10000);
-            else if (item === 'easyEreceipt') value = Math.min(value, 50000);
 
             total += value;
         }
@@ -627,7 +626,7 @@ function getPlan2Deductions() {
     const netIncome = incomeData.netIncome || 0;
     let total = 0;
 
-    const items = ['lifeInsurance', 'healthInsurance', 'pensionInsurance', 'pvd', 'rmf', 'thaiEsg', 'thaiEsgx', 'homeLoan', 'donationDouble', 'donationPolitical', 'easyEreceipt'];
+    const items = ['lifeInsurance', 'healthInsurance', 'pensionInsurance', 'pvd', 'rmf', 'thaiEsg', 'thaiEsgx', 'homeLoan', 'donationDouble', 'donationPolitical'];
 
     // คำนวณประกันชีวิต + ประกันสุขภาพ (รวมไม่เกิน 100K) ก่อน
     let insuranceTotal = 0;
@@ -691,7 +690,6 @@ function getPlan2Deductions() {
             else if (item === 'homeLoan') value = Math.min(value, 100000);
             else if (item === 'donationDouble') value = Math.min(value * 2, netIncome * 0.10); // 2 เท่า!
             else if (item === 'donationPolitical') value = Math.min(value, 10000);
-            else if (item === 'easyEreceipt') value = Math.min(value, 50000);
 
             total += value;
         }
@@ -706,7 +704,7 @@ function getDeductionBreakdown(plan) {
     const breakdown = {};
 
     const items = ['lifeInsurance', 'healthInsurance', 'pensionInsurance', 'pvd', 'rmf',
-                   'thaiEsg', 'thaiEsgx', 'homeLoan', 'donationDouble', 'donationPolitical', 'easyEreceipt'];
+                   'thaiEsg', 'thaiEsgx', 'homeLoan', 'donationDouble', 'donationPolitical'];
 
     const labels = {
         'lifeInsurance': 'ประกันชีวิต',
@@ -718,8 +716,7 @@ function getDeductionBreakdown(plan) {
         'thaiEsgx': 'Thai ESGx',
         'homeLoan': 'ดอกเบี้ยบ้าน',
         'donationDouble': 'บริจาค 2x',
-        'donationPolitical': 'บริจาคพรรคการเมือง',
-        'easyEreceipt': 'Easy E-Receipt'
+        'donationPolitical': 'บริจาคพรรคการเมือง'
     };
 
     items.forEach(item => {
@@ -738,7 +735,6 @@ function getDeductionBreakdown(plan) {
             else if (item === 'homeLoan') value = Math.min(value, 100000);
             else if (item === 'donationDouble') value = Math.min(value * 2, netIncome * 0.10);
             else if (item === 'donationPolitical') value = Math.min(value, 10000);
-            else if (item === 'easyEreceipt') value = Math.min(value, 50000);
 
             if (value > 0) {
                 breakdown[labels[item]] = value;
@@ -858,8 +854,7 @@ function createFinalChart(baseline, plan1, plan2) {
         'Thai ESGx': '#74B9FF',
         'ดอกเบี้ยบ้าน': '#A29BFE',
         'บริจาค 2x': '#FD79A8',
-        'บริจาคพรรคการเมือง': '#FDCB6E',
-        'Easy E-Receipt': '#6C5CE7'
+        'บริจาคพรรคการเมือง': '#FDCB6E'
     };
 
     // สร้าง datasets สำหรับ stacked bar chart
@@ -1044,8 +1039,7 @@ function createPieCharts() {
         'Thai ESGx': '#74B9FF',
         'ดอกเบี้ยบ้าน': '#A29BFE',
         'บริจาค 2x': '#FD79A8',
-        'บริจาคพรรคการเมือง': '#FDCB6E',
-        'Easy E-Receipt': '#6C5CE7'
+        'บริจาคพรรคการเมือง': '#FDCB6E'
     };
 
     // Pie Chart สำหรับ Plan 1
@@ -1618,11 +1612,11 @@ function initializeApp() {
 
     // Step 3: Plan 1 checkboxes and sliders
     console.log('🟢 Setting up Plan 1 items...');
-    setupPlanItems('plan1', ['lifeInsurance', 'healthInsurance', 'pensionInsurance', 'pvd', 'rmf', 'thaiEsg', 'thaiEsgx', 'homeLoan', 'donationDouble', 'donationPolitical', 'easyEreceipt'], updatePlan1);
+    setupPlanItems('plan1', ['lifeInsurance', 'healthInsurance', 'pensionInsurance', 'pvd', 'rmf', 'thaiEsg', 'thaiEsgx', 'homeLoan', 'donationDouble', 'donationPolitical'], updatePlan1);
 
     // Step 3: Plan 2 checkboxes and sliders
     console.log('🟡 Setting up Plan 2 items...');
-    setupPlanItems('plan2', ['lifeInsurance', 'healthInsurance', 'pensionInsurance', 'pvd', 'rmf', 'thaiEsg', 'thaiEsgx', 'homeLoan', 'donationDouble', 'donationPolitical', 'easyEreceipt'], updatePlan2);
+    setupPlanItems('plan2', ['lifeInsurance', 'healthInsurance', 'pensionInsurance', 'pvd', 'rmf', 'thaiEsg', 'thaiEsgx', 'homeLoan', 'donationDouble', 'donationPolitical'], updatePlan2);
 
     // Load saved data AFTER setting up listeners
     console.log('💾 Loading saved data...');
@@ -3049,8 +3043,7 @@ function generateDetailedComparison() {
         { label: 'Thai ESGx', p1: 'plan1_thaiEsgx', p2: 'plan2_thaiEsgx' },
         { label: 'ดอกเบี้ยบ้าน', p1: 'plan1_homeLoan', p2: 'plan2_homeLoan' },
         { label: 'บริจาค 2 เท่า', p1: 'plan1_donationDouble', p2: 'plan2_donationDouble' },
-        { label: 'บริจาคพรรคการเมือง', p1: 'plan1_donationPolitical', p2: 'plan2_donationPolitical' },
-        { label: 'Easy E-Receipt', p1: 'plan1_easyEreceipt', p2: 'plan2_easyEreceipt' }
+        { label: 'บริจาคพรรคการเมือง', p1: 'plan1_donationPolitical', p2: 'plan2_donationPolitical' }
     ];
 
     let rows = items.map(item => {
@@ -3333,8 +3326,7 @@ function getExportData() {
         'thaiEsgx': 'Thai ESGx',
         'homeLoan': 'ดอกเบี้ยบ้าน',
         'donationDouble': 'บริจาค 2 เท่า',
-        'donationPolitical': 'บริจาคพรรคการเมือง',
-        'easyEreceipt': 'Easy E-Receipt'
+        'donationPolitical': 'บริจาคพรรคการเมือง'
     };
 
     Object.keys(deductionLabels).forEach(item => {
